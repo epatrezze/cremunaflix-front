@@ -44,6 +44,8 @@ Passos:
 
 Observacao: o `vite.config.ts` calcula automaticamente o `base` usando o nome do repositorio no GitHub Actions. Se voce estiver fazendo build local para publicar manualmente, defina `VITE_BASE=/<nome-do-repo>/` antes de rodar o build.
 
+Se o site aparecer em branco com erro de `src/main.tsx`, isso indica que o GitHub Pages ainda esta servindo o conteudo do branch em vez do build do workflow. Confirme a configuracao acima.
+
 ## Alternar Mock / API
 O projeto usa mocks por padrao. Para alternar:
 
