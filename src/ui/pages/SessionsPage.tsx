@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Film, Session } from '../../contracts';
-import { apiClient } from '../../services';
+import { catalogRepository } from '../../domain/repositories/catalog.repository';
+import { sessionsRepository } from '../../domain/repositories/sessions.repository';
 import { formatDay, formatDate } from '../../domain/format';
 import { groupSessionsByDay } from '../../domain/sessions';
 import EmptyState from '../components/EmptyState';
@@ -27,9 +28,9 @@ const SessionsPage = () => {
     const load = async () => {
       setLoading(true);
       const [filmData, upcomingSessions, pastSessions] = await Promise.all([
-        apiClient.getCatalog(),
-        apiClient.getUpcomingSessions(),
-        apiClient.getPastSessions()
+        catalogRepository.getCatalog(),
+        sessionsRepository.getUpcomingSessions(),
+        sessionsRepository.getPastSessions()
       ]);
       if (mounted) {
         setFilms(filmData.items);

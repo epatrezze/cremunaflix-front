@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import type { Film, FilmStatus } from '../../contracts';
-import { apiClient } from '../../services';
+import { catalogRepository } from '../../domain/repositories/catalog.repository';
 import FilterBar from '../components/FilterBar';
 import FilmCard from '../components/FilmCard';
 import FilmModal from '../components/FilmModal';
@@ -64,7 +64,7 @@ const CatalogPage = () => {
   useEffect(() => {
     let mounted = true;
     const loadAll = async () => {
-      const data = await apiClient.getCatalog({ pageSize: 200 });
+      const data = await catalogRepository.getCatalog({ pageSize: 200 });
       if (mounted) {
         setAllFilms(data.items);
       }
@@ -91,7 +91,7 @@ const CatalogPage = () => {
     let mounted = true;
     const load = async () => {
       setLoading(true);
-      const data = await apiClient.getCatalog({
+      const data = await catalogRepository.getCatalog({
         query: debouncedSearch || undefined,
         genre: filters.genre || undefined,
         year: filters.year ? Number(filters.year) : undefined,

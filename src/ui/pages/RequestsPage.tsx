@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import type { Request } from '../../contracts';
-import { apiClient } from '../../services';
+import { requestsRepository } from '../../domain/repositories/requests.repository';
+import { createRequestCommand } from '../../domain/commands/create-request.command';
 import Badge from '../components/Badge';
 import EmptyState from '../components/EmptyState';
 import SkeletonList from '../components/SkeletonList';
@@ -38,7 +39,7 @@ const RequestsPage = () => {
     let mounted = true;
     const load = async () => {
       setLoading(true);
-      const data = await apiClient.listRequests();
+      const data = await requestsRepository.listRequests();
       if (mounted) {
         setRequests(data.items);
         setLoading(false);
@@ -80,16 +81,15 @@ const RequestsPage = () => {
       }
     }
     setSubmitting(true);
-    try {
-      const created = await apiClient.createRequest({ title, link, reason });
-      setRequests((prev) => [created, ...prev]);
+    const result = await createRequestCommand.execute({ title, link, reason });
+    if (result.ok) {
+      setRequests((prev) => [result.data, ...prev]);
       setFormState({ title: '', link: '', reason: '' });
       setFeedback({ type: 'success', message: 'Pedido enviado com sucesso.' });
-    } catch (error) {
-      setFeedback({ type: 'error', message: 'Nao foi possivel enviar o pedido.' });
-    } finally {
-      setSubmitting(false);
+    } else {
+      setFeedback({ type: 'error', message: result.error.message });
     }
+    setSubmitting(false);
   };
 
   return (

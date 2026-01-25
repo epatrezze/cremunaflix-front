@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Film, Session, Request } from '../../contracts';
-import { apiClient } from '../../services';
+import { catalogRepository } from '../../domain/repositories/catalog.repository';
+import { sessionsRepository } from '../../domain/repositories/sessions.repository';
+import { requestsRepository } from '../../domain/repositories/requests.repository';
 import Hero from '../components/Hero';
 import CarouselRow from '../components/CarouselRow';
 import FilmModal from '../components/FilmModal';
@@ -24,9 +26,9 @@ const HomePage = () => {
     const load = async () => {
       setLoading(true);
       const [filmData, sessionData, requestData] = await Promise.all([
-        apiClient.getCatalog(),
-        apiClient.getUpcomingSessions(),
-        apiClient.listRequests()
+        catalogRepository.getCatalog(),
+        sessionsRepository.getUpcomingSessions(),
+        requestsRepository.listRequests()
       ]);
       if (mounted) {
         setFilms(filmData.items);

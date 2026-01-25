@@ -96,3 +96,5 @@ Teste manual rapido (HTTP adapter):
 ```bash
 VITE_USE_MOCK=false VITE_API_BASE_URL=https://example.salesforce.com/services/apexrest npm run dev
 ```
+
+Nota: flags v7 do React Router habilitadas para preparar upgrade.
