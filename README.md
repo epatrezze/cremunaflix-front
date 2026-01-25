@@ -22,11 +22,18 @@ src/
   styles/
 ```
 
+## Styling
+Este projeto usa Tailwind CSS em conjunto com CSS global. As diretivas Tailwind estao em `src/styles/global.css`, que tambem concentra tokens e estilos custom. A migracao e incremental e alguns componentes ainda dependem das classes globais existentes.
+
 ## Rodando localmente
 ```bash
 npm install
 npm run dev
 ```
+
+## Migracao incremental
+- CSS global continua ativo para evitar regressao visual.
+- Tailwind esta configurado e pode ser aplicado gradualmente em componentes novos ou existentes.
 
 ## Build
 ```bash
