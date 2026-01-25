@@ -6,6 +6,11 @@ import FilmCard from '../components/FilmCard';
 import FilmModal from '../components/FilmModal';
 import SkeletonCard from '../components/SkeletonCard';
 
+/**
+ * Catalog page with filters and film grid.
+ *
+ * @returns Catalog page section.
+ */
 const CatalogPage = () => {
   const [films, setFilms] = useState<Film[]>([]);
   const [loading, setLoading] = useState(true);

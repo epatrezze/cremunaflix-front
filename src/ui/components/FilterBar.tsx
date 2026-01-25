@@ -1,3 +1,6 @@
+/**
+ * Props for FilterBar component.
+ */
 interface FilterBarProps {
   search: string;
   genre: string;
@@ -13,6 +16,12 @@ interface FilterBarProps {
   }) => void;
 }
 
+/**
+ * Filter controls for catalog search and facets.
+ *
+ * @param props - Filter bar props.
+ * @returns Filter bar element.
+ */
 const FilterBar = ({
   search,
   genre,

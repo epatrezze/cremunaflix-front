@@ -2,11 +2,20 @@ import { useEffect } from 'react';
 import type { Film } from '../../contracts';
 import Badge from './Badge';
 
+/**
+ * Props for FilmModal component.
+ */
 interface FilmModalProps {
   film: Film | null;
   onClose: () => void;
 }
 
+/**
+ * Modal with film details and close handlers.
+ *
+ * @param props - Film modal props.
+ * @returns Modal element or null when closed.
+ */
 const FilmModal = ({ film, onClose }: FilmModalProps) => {
   useEffect(() => {
     const handleKey = (event: KeyboardEvent) => {

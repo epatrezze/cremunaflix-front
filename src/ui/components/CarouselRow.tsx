@@ -1,6 +1,9 @@
 import type { Film } from '../../contracts';
 import FilmCard from './FilmCard';
 
+/**
+ * Props for CarouselRow component.
+ */
 interface CarouselRowProps {
   title: string;
   subtitle?: string;
@@ -8,6 +11,12 @@ interface CarouselRowProps {
   onSelect: (film: Film) => void;
 }
 
+/**
+ * Horizontal carousel for film cards.
+ *
+ * @param props - Carousel row props.
+ * @returns Carousel section.
+ */
 const CarouselRow = ({ title, subtitle, items, onSelect }: CarouselRowProps) => (
   <section className="carousel">
     <div className="section-header">

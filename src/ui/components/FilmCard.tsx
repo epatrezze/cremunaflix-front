@@ -1,11 +1,20 @@
 import type { Film } from '../../contracts';
 import Badge from './Badge';
 
+/**
+ * Props for FilmCard component.
+ */
 interface FilmCardProps {
   film: Film;
   onSelect: (film: Film) => void;
 }
 
+/**
+ * Film summary card used in grids and carousels.
+ *
+ * @param props - Film card props.
+ * @returns Film card element.
+ */
 const FilmCard = ({ film, onSelect }: FilmCardProps) => (
   <article className="card film-card" style={{ borderColor: `${film.accentColor}33` }}>
     <div className="film-card-media" style={{ background: film.backdrop }}>

@@ -1,3 +1,8 @@
+/**
+ * Placeholder skeleton used while data loads.
+ *
+ * @returns Skeleton card element.
+ */
 const SkeletonCard = () => (
   <div className="card skeleton-card">
     <div className="skeleton skeleton-media" />

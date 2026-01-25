@@ -7,6 +7,11 @@ const links = [
   { to: '/pedidos', label: 'Pedidos' }
 ];
 
+/**
+ * Top navigation bar for primary routes.
+ *
+ * @returns Navbar with primary navigation links.
+ */
 const Navbar = () => (
   <header className="navbar">
     <div className="navbar-brand">

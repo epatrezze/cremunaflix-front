@@ -4,8 +4,16 @@ import { apiClient } from '../../services';
 import { formatDay, formatDate } from '../../domain/format';
 import { groupSessionsByDay } from '../../domain/sessions';
 
+/**
+ * Available session tabs.
+ */
 type TabKey = 'UPCOMING' | 'PAST';
 
+/**
+ * Sessions page with upcoming and past listings.
+ *
+ * @returns Sessions page section.
+ */
 const SessionsPage = () => {
   const [films, setFilms] = useState<Film[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);

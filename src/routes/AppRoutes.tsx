@@ -4,6 +4,11 @@ import CatalogPage from '../ui/pages/CatalogPage';
 import SessionsPage from '../ui/pages/SessionsPage';
 import RequestsPage from '../ui/pages/RequestsPage';
 
+/**
+ * Defines top-level routes for the SPA.
+ *
+ * @returns Route tree for the application.
+ */
 const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<HomePage />} />

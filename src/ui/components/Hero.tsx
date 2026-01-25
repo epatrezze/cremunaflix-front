@@ -2,12 +2,21 @@ import type { Film, Session } from '../../contracts';
 import Badge from './Badge';
 import { formatDate } from '../../domain/format';
 
+/**
+ * Props for Hero component.
+ */
 interface HeroProps {
   film: Film | null;
   session: Session | null;
   onSelect?: (film: Film) => void;
 }
 
+/**
+ * Featured hero section for the next session.
+ *
+ * @param props - Hero props.
+ * @returns Hero section or fallback when no session exists.
+ */
 const Hero = ({ film, session, onSelect }: HeroProps) => {
   if (!film || !session) {
     return (

@@ -6,6 +6,11 @@ import CarouselRow from '../components/CarouselRow';
 import FilmModal from '../components/FilmModal';
 import SkeletonCard from '../components/SkeletonCard';
 
+/**
+ * Home page with hero and curated carousels.
+ *
+ * @returns Home page section.
+ */
 const HomePage = () => {
   const [films, setFilms] = useState<Film[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -64,6 +69,14 @@ const HomePage = () => {
     return ranked.slice(0, 8);
   }, [films, requests]);
 
+  /**
+   * Renders a skeleton carousel section while data loads.
+   *
+   * @param title - Section title.
+   * @param subtitle - Section subtitle.
+   * @param keyPrefix - Key prefix for skeleton items.
+   * @returns Skeleton carousel section.
+   */
   const renderSkeletonRow = (title: string, subtitle: string, keyPrefix: string) => (
     <section className="carousel">
       <div className="section-header">

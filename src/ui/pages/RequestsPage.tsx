@@ -4,12 +4,20 @@ import type { Request } from '../../contracts';
 import { apiClient } from '../../services';
 import Badge from '../components/Badge';
 
+/**
+ * Maps request status to display labels.
+ */
 const statusLabel: Record<Request['status'], string> = {
   OPEN: 'Em avaliacao',
   APPROVED: 'Aprovado',
   DECLINED: 'Recusado'
 };
 
+/**
+ * Requests page with submission form and list.
+ *
+ * @returns Requests page section.
+ */
 const RequestsPage = () => {
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,6 +44,12 @@ const RequestsPage = () => {
     };
   }, []);
 
+  /**
+   * Handles request form submission.
+   *
+   * @param event - Form submission event.
+   * @returns Promise resolved after handling the submit.
+   */
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     if (!formState.title || !formState.link || !formState.reason) {
