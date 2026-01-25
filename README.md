@@ -31,6 +31,8 @@ npm install
 npm run dev
 ```
 
+Nota: CI usa `npm ci`.
+
 ## Migracao incremental
 - CSS global continua ativo para evitar regressao visual.
 - Tailwind esta configurado e pode ser aplicado gradualmente em componentes novos ou existentes.
