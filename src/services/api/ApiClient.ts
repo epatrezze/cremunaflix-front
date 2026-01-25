@@ -28,7 +28,7 @@ export interface CreateRequestPayload {
 
 export interface ApiClient {
   getCatalog: (query?: CatalogQuery) => Promise<PaginatedResponse<Film>>;
-  getFilm: (id: string) => Promise<Film>;
+  getFilmById: (id: string) => Promise<Film>;
   getUpcomingSessions: () => Promise<Session[]>;
   getPastSessions: (query?: PastSessionsQuery) => Promise<Session[]>;
   listRequests: (query?: RequestListQuery) => Promise<PaginatedResponse<Request>>;

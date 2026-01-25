@@ -484,6 +484,29 @@ a:focus-visible {
   text-decoration: underline;
 }
 
+.empty-state {
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  padding: 2rem;
+  text-align: center;
+  background: rgba(16, 18, 28, 0.55);
+  display: grid;
+  gap: 0.6rem;
+}
+
+.empty-state-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.empty-state-description {
+  color: var(--muted);
+}
+
+.empty-state-action {
+  justify-self: center;
+}
+
 .request-item {
   padding: 1rem 1.2rem;
   border-radius: var(--radius-md);
@@ -491,6 +514,19 @@ a:focus-visible {
   background: rgba(16, 18, 28, 0.75);
   display: grid;
   gap: 0.4rem;
+}
+
+.request-feedback {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.request-feedback.success {
+  color: #8fe5b8;
+}
+
+.request-feedback.error {
+  color: #ff9a8a;
 }
 
 .modal-overlay {

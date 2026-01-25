@@ -44,7 +44,7 @@ export class HttpAdapter implements ApiClient {
     return this.request(`/api/v1/catalog${suffix ? `?${suffix}` : ''}`);
   }
 
-  async getFilm(id: string): Promise<Film> {
+  async getFilmById(id: string): Promise<Film> {
     return this.request(`/api/v1/films/${id}`);
   }
 

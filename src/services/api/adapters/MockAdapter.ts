@@ -30,7 +30,7 @@ export class MockAdapter implements ApiClient {
   }
 
   async getCatalog(query: CatalogQuery = {}) {
-    await delay(350);
+    await delay(220);
     const normalizedQuery = query.query?.toLowerCase().trim();
     const filtered = films.filter((film) => {
       const matchesQuery = normalizedQuery
@@ -45,8 +45,8 @@ export class MockAdapter implements ApiClient {
     return paginate(filtered, query.page ?? 1, query.pageSize ?? 20);
   }
 
-  async getFilm(id: string) {
-    await delay(250);
+  async getFilmById(id: string) {
+    await delay(200);
     const film = films.find((item) => item.id === id);
     if (!film) {
       throw new Error(`Film not found: ${id}`);
@@ -55,14 +55,14 @@ export class MockAdapter implements ApiClient {
   }
 
   async getUpcomingSessions() {
-    await delay(300);
+    await delay(240);
     return sessions
       .filter((session) => session.status === 'UPCOMING')
       .sort((a, b) => a.startsAt.localeCompare(b.startsAt));
   }
 
   async getPastSessions(query: PastSessionsQuery = {}) {
-    await delay(300);
+    await delay(240);
     const fromDate = query.from ? new Date(query.from) : null;
     const toDate = query.to ? new Date(query.to) : null;
 
@@ -82,7 +82,7 @@ export class MockAdapter implements ApiClient {
   }
 
   async listRequests(query: RequestListQuery = {}) {
-    await delay(300);
+    await delay(220);
     const sorted = [...this.requestStore].sort((a, b) => {
       if (query.sort === 'oldest') {
         return a.createdAt.localeCompare(b.createdAt);
@@ -94,7 +94,7 @@ export class MockAdapter implements ApiClient {
   }
 
   async createRequest(payload: CreateRequestPayload) {
-    await delay(400);
+    await delay(260);
     const newRequest: Request = {
       id: createId(),
       title: payload.title,

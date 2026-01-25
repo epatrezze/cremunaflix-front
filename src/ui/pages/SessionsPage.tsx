@@ -3,6 +3,8 @@ import type { Film, Session } from '../../contracts';
 import { apiClient } from '../../services';
 import { formatDay, formatDate } from '../../domain/format';
 import { groupSessionsByDay } from '../../domain/sessions';
+import EmptyState from '../components/EmptyState';
+import SkeletonList from '../components/SkeletonList';
 
 /**
  * Available session tabs.
@@ -72,14 +74,18 @@ const SessionsPage = () => {
         </button>
       </div>
       {loading ? (
-        <div className="list-group">
-          {Array.from({ length: 4 }).map((_, index) => (
-            <div key={`session-skeleton-${index}`} className="session-card skeleton">
-              <div className="skeleton skeleton-line" />
-              <div className="skeleton skeleton-line short" />
-            </div>
-          ))}
-        </div>
+        <SkeletonList count={4} />
+      ) : Object.keys(grouped).length === 0 ? (
+        <EmptyState
+          title={tab === 'UPCOMING' ? 'Sem sessoes futuras' : 'Sem sessoes passadas'}
+          description={
+            tab === 'UPCOMING'
+              ? 'Volte em breve para ver a proxima exibicao.'
+              : 'Ainda nao registramos sessoes anteriores.'
+          }
+          actionLabel={tab === 'UPCOMING' ? 'Ver sessoes passadas' : 'Ver proximas'}
+          onAction={() => setTab(tab === 'UPCOMING' ? 'PAST' : 'UPCOMING')}
+        />
       ) : (
         <div className="list-group">
           {Object.entries(grouped).map(([date, items]) => (
