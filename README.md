@@ -42,6 +42,8 @@ Passos:
 2. Faca push para a branch `main`.
 3. Aguarde o workflow finalizar.
 
+Observacao: o `vite.config.ts` calcula automaticamente o `base` usando o nome do repositorio no GitHub Actions. Se voce estiver fazendo build local para publicar manualmente, defina `VITE_BASE=/<nome-do-repo>/` antes de rodar o build.
+
 ## Alternar Mock / API
 O projeto usa mocks por padrao. Para alternar:
 
