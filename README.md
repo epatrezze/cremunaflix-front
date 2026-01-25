@@ -46,6 +46,11 @@ Observacao: o `vite.config.ts` calcula automaticamente o `base` usando o nome do
 
 Se o site aparecer em branco com erro de `src/main.tsx`, isso indica que o GitHub Pages ainda esta servindo o conteudo do branch em vez do build do workflow. Confirme a configuracao acima.
 
+Checklist rapido de diagnostico:
+1. Pages esta em Settings > Pages -> Source: GitHub Actions.
+2. O deploy mais recente mostra artefato publicado (dist).
+3. O HTML servido referencia `/cremunaflix-front/assets/...` em vez de `/src/main.tsx`.
+
 ## Alternar Mock / API
 O projeto usa mocks por padrao. Para alternar:
 

@@ -6,7 +6,7 @@ const resolveBase = () => {
   if (process.env.VITE_BASE) {
     return process.env.VITE_BASE;
   }
-  if (repo) {
+  if (process.env.GITHUB_PAGES === 'true' && repo) {
     return `/${repo}/`;
   }
   return '/';
