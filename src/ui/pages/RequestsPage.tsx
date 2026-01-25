@@ -32,9 +32,9 @@ const RequestsPage = () => {
     let mounted = true;
     const load = async () => {
       setLoading(true);
-      const data = await apiClient.getRequests();
+      const data = await apiClient.listRequests();
       if (mounted) {
-        setRequests(data);
+        setRequests(data.items);
         setLoading(false);
       }
     };

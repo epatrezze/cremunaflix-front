@@ -74,4 +74,9 @@ O projeto usa mocks por padrao. Para alternar:
 VITE_USE_MOCK=false npm run dev
 ```
 
-A implementacao futura da API deve ser feita em `src/services/adapters/HttpAdapter.ts` seguindo o contrato em `src/contracts`.
+Configure `VITE_API_BASE_URL` para apontar para o Salesforce (placeholder em `.env.example`).
+Copie `.env.example` para `.env` e ajuste os valores conforme necessario.
+
+A implementacao futura da API deve ser feita em `src/services/api/adapters/HttpAdapter.ts` seguindo o contrato em `src/contracts/api.v1.ts`.
+
+Documentacao do contrato: `docs/api-v1.md`.

@@ -23,14 +23,14 @@ const HomePage = () => {
     const load = async () => {
       setLoading(true);
       const [filmData, sessionData, requestData] = await Promise.all([
-        apiClient.getFilms(),
-        apiClient.getSessions(),
-        apiClient.getRequests()
+        apiClient.getCatalog(),
+        apiClient.getUpcomingSessions(),
+        apiClient.listRequests()
       ]);
       if (mounted) {
-        setFilms(filmData);
+        setFilms(filmData.items);
         setSessions(sessionData);
-        setRequests(requestData);
+        setRequests(requestData.items);
         setLoading(false);
       }
     };

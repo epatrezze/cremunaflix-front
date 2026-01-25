@@ -26,9 +26,9 @@ const CatalogPage = () => {
     let mounted = true;
     const load = async () => {
       setLoading(true);
-      const data = await apiClient.getFilms();
+      const data = await apiClient.getCatalog();
       if (mounted) {
-        setFilms(data);
+        setFilms(data.items);
         setLoading(false);
       }
     };
