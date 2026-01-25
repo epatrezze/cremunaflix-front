@@ -83,7 +83,7 @@ O projeto usa mocks por padrao. Para alternar:
 VITE_USE_MOCK=false npm run dev
 ```
 
-Configure `VITE_API_BASE_URL` para apontar para o Salesforce (placeholder em `.env.example`).
+Configure `VITE_API_BASE_URL` para apontar para o Salesforce Apex REST (placeholder em `.env.example`).
 Copie `.env.example` para `.env` e ajuste os valores conforme necessario.
 
 A implementacao futura da API deve ser feita em `src/services/api/adapters/HttpAdapter.ts` seguindo o contrato em `src/contracts/api.v1.ts`.
@@ -91,3 +91,8 @@ A implementacao futura da API deve ser feita em `src/services/api/adapters/HttpA
 Documentacao do contrato: `docs/api-v1.md`.
 
 Nota API-ready: defina `VITE_USE_MOCK=false` e `VITE_API_BASE_URL` para usar o HttpAdapter sem alterar a UI.
+
+Teste manual rapido (HTTP adapter):
+```bash
+VITE_USE_MOCK=false VITE_API_BASE_URL=https://example.salesforce.com/services/apexrest npm run dev
+```

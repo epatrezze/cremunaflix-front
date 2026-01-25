@@ -13,3 +13,6 @@ export type {
   RequestListQuery,
   CreateRequestPayload
 } from './ApiClient';
+
+export type { AuthTokenProvider } from './auth';
+export { NullAuthTokenProvider } from './auth';
