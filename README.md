@@ -34,6 +34,22 @@ npm run build
 npm run preview
 ```
 
+## Validacao local (Pages)
+Build normal:
+```bash
+npm run build
+```
+
+Build simulando GitHub Pages (ajusta base path):
+```bash
+GITHUB_PAGES=true VITE_BASE=/cremunaflix-front/ npm run build
+```
+
+Preview do build:
+```bash
+npm run preview
+```
+
 ## Deploy no GitHub Pages
 O workflow em `.github/workflows/deploy.yml` publica automaticamente ao fazer push na branch `main`.
 
