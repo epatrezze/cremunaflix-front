@@ -31,7 +31,7 @@ const Hero = ({ film, session, onSelect }: HeroProps) => {
   }
 
   return (
-    <section className="hero" style={{ background: film.backdrop }}>
+    <section className="hero" style={{ backgroundImage: `${film.backdrop}, var(--hero-image)` }}>
       <div className="hero-content reveal">
         <Badge label="Proxima sessao" />
         <h1>{film.title}</h1>

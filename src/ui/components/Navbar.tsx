@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import ThemeToggle from './ThemeToggle';
 
 const links = [
   { to: '/', label: 'Home' },
@@ -32,9 +33,12 @@ const Navbar = () => (
         </NavLink>
       ))}
     </nav>
-    <a className="button-ghost inline-flex items-center justify-center" href="#/pedidos">
-      Quero sugerir
-    </a>
+    <div className="navbar-actions">
+      <ThemeToggle />
+      <a className="button-ghost inline-flex items-center justify-center" href="#/pedidos">
+        Quero sugerir
+      </a>
+    </div>
   </header>
 );
 
