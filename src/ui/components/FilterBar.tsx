@@ -8,6 +8,8 @@ interface FilterBarProps {
   status: string;
   genres: string[];
   years: number[];
+  showReset?: boolean;
+  onReset?: () => void;
   onChange: (next: {
     search?: string;
     genre?: string;
@@ -29,6 +31,8 @@ const FilterBar = ({
   status,
   genres,
   years,
+  showReset,
+  onReset,
   onChange
 }: FilterBarProps) => (
   <div className="filter-bar">
@@ -84,6 +88,11 @@ const FilterBar = ({
         <option value="SCHEDULED">Agendados</option>
       </select>
     </label>
+    {showReset && onReset && (
+      <button className="button-ghost filter-reset" type="button" onClick={onReset}>
+        Limpar filtros
+      </button>
+    )}
   </div>
 );
 

@@ -22,27 +22,43 @@ const SessionsPage = () => {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [tab, setTab] = useState<TabKey>('UPCOMING');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [reloadToken, setReloadToken] = useState(0);
 
   useEffect(() => {
     let mounted = true;
     const load = async () => {
       setLoading(true);
-      const [filmData, upcomingSessions, pastSessions] = await Promise.all([
-        catalogRepository.getCatalog(),
-        sessionsRepository.getUpcomingSessions(),
-        sessionsRepository.getPastSessions()
-      ]);
-      if (mounted) {
-        setFilms(filmData.items);
-        setSessions([...upcomingSessions, ...pastSessions]);
-        setLoading(false);
+      setError(null);
+      try {
+        const [filmData, upcomingSessions, pastSessions] = await Promise.all([
+          catalogRepository.getCatalog(),
+          sessionsRepository.getUpcomingSessions(),
+          sessionsRepository.getPastSessions()
+        ]);
+        if (mounted) {
+          setFilms(filmData.items);
+          setSessions([...upcomingSessions, ...pastSessions]);
+        }
+      } catch (err) {
+        if (mounted) {
+          const message =
+            err && typeof err === 'object' && 'message' in err
+              ? String((err as { message: string }).message)
+              : 'Nao foi possivel carregar as sessoes.';
+          setError(message);
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
     load();
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [reloadToken]);
 
   const filteredSessions = useMemo(() => {
     return sessions
@@ -76,6 +92,13 @@ const SessionsPage = () => {
       </div>
       {loading ? (
         <SkeletonList count={4} />
+      ) : error ? (
+        <EmptyState
+          title="Falha ao carregar"
+          description={error}
+          actionLabel="Tentar novamente"
+          onAction={() => setReloadToken((prev) => prev + 1)}
+        />
       ) : Object.keys(grouped).length === 0 ? (
         <EmptyState
           title={tab === 'UPCOMING' ? 'Sem sessoes futuras' : 'Sem sessoes passadas'}

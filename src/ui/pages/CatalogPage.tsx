@@ -18,6 +18,8 @@ const CatalogPage = () => {
   const [films, setFilms] = useState<Film[]>([]);
   const [allFilms, setAllFilms] = useState<Film[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [reloadToken, setReloadToken] = useState(0);
   const [selectedFilm, setSelectedFilm] = useState<Film | null>(null);
   const [filters, setFilters] = useState({
     search: searchParams.get('query') ?? '',
@@ -26,6 +28,8 @@ const CatalogPage = () => {
     status: searchParams.get('status') ?? ''
   });
   const [debouncedSearch, setDebouncedSearch] = useState(filters.search);
+
+  const handleRetry = () => setReloadToken((prev) => prev + 1);
 
   const areFiltersEqual = (next: typeof filters) =>
     next.search === filters.search &&
@@ -64,16 +68,22 @@ const CatalogPage = () => {
   useEffect(() => {
     let mounted = true;
     const loadAll = async () => {
-      const data = await catalogRepository.getCatalog({ pageSize: 200 });
-      if (mounted) {
-        setAllFilms(data.items);
+      try {
+        const data = await catalogRepository.getCatalog({ pageSize: 200 });
+        if (mounted) {
+          setAllFilms(data.items);
+        }
+      } catch {
+        if (mounted) {
+          setAllFilms([]);
+        }
       }
     };
     loadAll();
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [reloadToken]);
 
   const genres = useMemo(() => {
     const set = new Set<string>();
@@ -91,30 +101,48 @@ const CatalogPage = () => {
     let mounted = true;
     const load = async () => {
       setLoading(true);
-      const data = await catalogRepository.getCatalog({
-        query: debouncedSearch || undefined,
-        genre: filters.genre || undefined,
-        year: filters.year ? Number(filters.year) : undefined,
-        status: (filters.status || undefined) as FilmStatus | undefined,
-        page: 1,
-        pageSize: 50
-      });
-      if (mounted) {
-        setFilms(data.items);
-        setLoading(false);
+      setError(null);
+      try {
+        const data = await catalogRepository.getCatalog({
+          query: debouncedSearch || undefined,
+          genre: filters.genre || undefined,
+          year: filters.year ? Number(filters.year) : undefined,
+          status: (filters.status || undefined) as FilmStatus | undefined,
+          page: 1,
+          pageSize: 50
+        });
+        if (mounted) {
+          setFilms(data.items);
+        }
+      } catch (err) {
+        if (mounted) {
+          const message =
+            err && typeof err === 'object' && 'message' in err
+              ? String((err as { message: string }).message)
+              : 'Nao foi possivel carregar o catalogo.';
+          setError(message);
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
     load();
     return () => {
       mounted = false;
     };
-  }, [debouncedSearch, filters.genre, filters.year, filters.status]);
+  }, [debouncedSearch, filters.genre, filters.year, filters.status, reloadToken]);
 
   const handleResetFilters = () => {
     const cleared = { search: '', genre: '', year: '', status: '' };
     setFilters(cleared);
     setDebouncedSearch('');
   };
+
+  const hasActiveFilters = Boolean(
+    filters.search || filters.genre || filters.year || filters.status
+  );
 
   return (
     <section>
@@ -133,9 +161,21 @@ const CatalogPage = () => {
         genres={genres}
         years={years}
         onChange={(next) => setFilters((prev) => ({ ...prev, ...next }))}
+        showReset={hasActiveFilters}
+        onReset={handleResetFilters}
       />
+      {!loading && !error && (
+        <p className="page-subtitle">Resultados: {films.length}</p>
+      )}
       {loading ? (
         <SkeletonGrid count={8} />
+      ) : error ? (
+        <EmptyState
+          title="Falha ao carregar"
+          description={error}
+          actionLabel="Tentar novamente"
+          onAction={handleRetry}
+        />
       ) : films.length === 0 ? (
         <EmptyState
           title="Nenhum filme encontrado"

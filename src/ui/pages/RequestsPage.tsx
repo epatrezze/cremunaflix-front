@@ -24,11 +24,20 @@ const statusLabel: Record<Request['status'], string> = {
 const RequestsPage = () => {
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [reloadToken, setReloadToken] = useState(0);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(
     null
   );
   const titleRef = useRef<HTMLInputElement>(null);
+  const linkRef = useRef<HTMLInputElement>(null);
+  const reasonRef = useRef<HTMLTextAreaElement>(null);
   const [formState, setFormState] = useState({
+    title: '',
+    link: '',
+    reason: ''
+  });
+  const [fieldErrors, setFieldErrors] = useState({
     title: '',
     link: '',
     reason: ''
@@ -39,17 +48,31 @@ const RequestsPage = () => {
     let mounted = true;
     const load = async () => {
       setLoading(true);
-      const data = await requestsRepository.listRequests();
-      if (mounted) {
-        setRequests(data.items);
-        setLoading(false);
+      setError(null);
+      try {
+        const data = await requestsRepository.listRequests();
+        if (mounted) {
+          setRequests(data.items);
+        }
+      } catch (err) {
+        if (mounted) {
+          const message =
+            err && typeof err === 'object' && 'message' in err
+              ? String((err as { message: string }).message)
+              : 'Nao foi possivel carregar os pedidos.';
+          setError(message);
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
     load();
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [reloadToken]);
 
   /**
    * Handles request form submission.
@@ -60,16 +83,21 @@ const RequestsPage = () => {
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setFeedback(null);
+    setFieldErrors({ title: '', link: '', reason: '' });
     const title = formState.title.trim();
     const link = formState.link.trim();
     const reason = formState.reason.trim();
 
     if (!title) {
       setFeedback({ type: 'error', message: 'Informe um titulo para continuar.' });
+      setFieldErrors({ title: 'Titulo obrigatorio.', link: '', reason: '' });
+      titleRef.current?.focus();
       return;
     }
     if (!reason) {
       setFeedback({ type: 'error', message: 'Explique o motivo do pedido.' });
+      setFieldErrors({ title: '', link: '', reason: 'Motivo obrigatorio.' });
+      reasonRef.current?.focus();
       return;
     }
     if (link) {
@@ -77,6 +105,8 @@ const RequestsPage = () => {
         new URL(link);
       } catch {
         setFeedback({ type: 'error', message: 'O link informado nao parece valido.' });
+        setFieldErrors({ title: '', link: 'Link invalido.', reason: '' });
+        linkRef.current?.focus();
         return;
       }
     }
@@ -109,37 +139,72 @@ const RequestsPage = () => {
               type="text"
               ref={titleRef}
               value={formState.title}
-              onChange={(event) =>
-                setFormState((prev) => ({ ...prev, title: event.target.value }))
-              }
+              onChange={(event) => {
+                const value = event.target.value;
+                setFormState((prev) => ({ ...prev, title: value }));
+                if (fieldErrors.title) {
+                  setFieldErrors((prev) => ({ ...prev, title: '' }));
+                }
+              }}
               placeholder="Digite o nome do filme"
+              aria-invalid={Boolean(fieldErrors.title)}
+              aria-describedby={fieldErrors.title ? 'title-error' : undefined}
               required
             />
+            {fieldErrors.title && (
+              <p id="title-error" className="field-error">
+                {fieldErrors.title}
+              </p>
+            )}
           </div>
           <div>
             <label htmlFor="link">Link</label>
             <input
               id="link"
               type="url"
+              ref={linkRef}
               value={formState.link}
-              onChange={(event) =>
-                setFormState((prev) => ({ ...prev, link: event.target.value }))
-              }
+              onChange={(event) => {
+                const value = event.target.value;
+                setFormState((prev) => ({ ...prev, link: value }));
+                if (fieldErrors.link) {
+                  setFieldErrors((prev) => ({ ...prev, link: '' }));
+                }
+              }}
               placeholder="IMDb, Letterboxd, trailer"
+              aria-invalid={Boolean(fieldErrors.link)}
+              aria-describedby={fieldErrors.link ? 'link-error' : undefined}
             />
+            {fieldErrors.link && (
+              <p id="link-error" className="field-error">
+                {fieldErrors.link}
+              </p>
+            )}
           </div>
           <div>
             <label htmlFor="reason">Motivo</label>
             <textarea
               id="reason"
+              ref={reasonRef}
               value={formState.reason}
-              onChange={(event) =>
-                setFormState((prev) => ({ ...prev, reason: event.target.value }))
-              }
+              onChange={(event) => {
+                const value = event.target.value;
+                setFormState((prev) => ({ ...prev, reason: value }));
+                if (fieldErrors.reason) {
+                  setFieldErrors((prev) => ({ ...prev, reason: '' }));
+                }
+              }}
               placeholder="Por que devemos exibir?"
               rows={4}
+              aria-invalid={Boolean(fieldErrors.reason)}
+              aria-describedby={fieldErrors.reason ? 'reason-error' : undefined}
               required
             />
+            {fieldErrors.reason && (
+              <p id="reason-error" className="field-error">
+                {fieldErrors.reason}
+              </p>
+            )}
           </div>
           <button className="button-primary" type="submit" disabled={submitting}>
             {submitting ? 'Enviando...' : 'Enviar pedido'}
@@ -155,6 +220,13 @@ const RequestsPage = () => {
           <div className="request-list">
             {loading ? (
               <SkeletonList count={3} containerClassName="request-list" itemClassName="request-item" />
+            ) : error ? (
+              <EmptyState
+                title="Falha ao carregar"
+                description={error}
+                actionLabel="Tentar novamente"
+                onAction={() => setReloadToken((prev) => prev + 1)}
+              />
             ) : requests.length === 0 ? (
               <EmptyState
                 title="Nenhum pedido ainda"

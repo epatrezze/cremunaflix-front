@@ -132,6 +132,12 @@ textarea {
   outline: none;
 }
 
+input[aria-invalid='true'],
+select[aria-invalid='true'],
+textarea[aria-invalid='true'] {
+  border-color: rgba(255, 154, 138, 0.8);
+}
+
 label {
   display: grid;
   gap: 0.4rem;
@@ -386,7 +392,7 @@ a:focus-visible {
 
 .filter-bar {
   display: grid;
-  grid-template-columns: 2fr repeat(3, minmax(140px, 1fr));
+  grid-template-columns: 2fr repeat(3, minmax(140px, 1fr)) auto;
   gap: 1rem;
   margin: 2rem 0;
 }
@@ -394,6 +400,11 @@ a:focus-visible {
 .filter-bar input,
 .filter-bar select {
   width: 100%;
+}
+
+.filter-reset {
+  align-self: end;
+  white-space: nowrap;
 }
 
 .tab-row {
@@ -519,6 +530,11 @@ a:focus-visible {
 .request-feedback {
   font-size: 0.9rem;
   color: var(--muted);
+}
+
+.field-error {
+  font-size: 0.85rem;
+  color: #ff9a8a;
 }
 
 .request-feedback.success {

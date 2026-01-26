@@ -19,22 +19,39 @@ const HomePage = () => {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [reloadToken, setReloadToken] = useState(0);
   const [selectedFilm, setSelectedFilm] = useState<Film | null>(null);
+  const handleRetry = () => setReloadToken((prev) => prev + 1);
 
   useEffect(() => {
     let mounted = true;
     const load = async () => {
       setLoading(true);
-      const [filmData, sessionData, requestData] = await Promise.all([
-        catalogRepository.getCatalog(),
-        sessionsRepository.getUpcomingSessions(),
-        requestsRepository.listRequests()
-      ]);
-      if (mounted) {
-        setFilms(filmData.items);
-        setSessions(sessionData);
-        setRequests(requestData.items);
-        setLoading(false);
+      setError(null);
+      try {
+        const [filmData, sessionData, requestData] = await Promise.all([
+          catalogRepository.getCatalog(),
+          sessionsRepository.getUpcomingSessions(),
+          requestsRepository.listRequests()
+        ]);
+        if (mounted) {
+          setFilms(filmData.items);
+          setSessions(sessionData);
+          setRequests(requestData.items);
+        }
+      } catch (err) {
+        if (mounted) {
+          const message =
+            err && typeof err === 'object' && 'message' in err
+              ? String((err as { message: string }).message)
+              : 'Nao foi possivel carregar a home.';
+          setError(message);
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
     load();
@@ -42,7 +59,7 @@ const HomePage = () => {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [reloadToken]);
 
   const nextSession = useMemo(() => {
     return sessions
@@ -109,6 +126,13 @@ const HomePage = () => {
           'Reprises comentadas das ultimas semanas',
           'latest'
         )
+      ) : error ? (
+        <EmptyState
+          title="Falha ao carregar"
+          description={error}
+          actionLabel="Tentar novamente"
+          onAction={handleRetry}
+        />
       ) : latestScreened.length === 0 ? (
         <EmptyState
           title="Nada exibido ainda"
@@ -128,6 +152,13 @@ const HomePage = () => {
           'Titulos que a comunidade mais pede para voltar',
           'requested'
         )
+      ) : error ? (
+        <EmptyState
+          title="Falha ao carregar"
+          description={error}
+          actionLabel="Tentar novamente"
+          onAction={handleRetry}
+        />
       ) : mostRequested.length === 0 ? (
         <EmptyState
           title="Sem pedidos ainda"
