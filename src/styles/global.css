@@ -235,9 +235,10 @@ a:focus-visible {
 }
 
 .film-card {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 0;
-  min-height: 360px;
+  min-height: 380px;
 }
 
 .film-card-media {
@@ -256,20 +257,33 @@ a:focus-visible {
 }
 
 .film-card-body {
-  display: grid;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   gap: 0.6rem;
   padding: 1.1rem 1.2rem 1.3rem;
 }
 
 .film-card-title {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 0.8rem;
 }
 
 .film-card-title h3 {
   font-size: 1.1rem;
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.4em;
+}
+
+.film-card-title .badge {
+  flex-shrink: 0;
+  margin-top: 0.15rem;
 }
 
 .film-card-meta {
@@ -280,14 +294,19 @@ a:focus-visible {
 .film-card-synopsis {
   color: var(--muted);
   font-size: 0.9rem;
-  min-height: 58px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 4.2em;
 }
 
 .film-card-footer {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 0.8rem;
+  flex-wrap: wrap;
 }
 
 .film-card-genres {
@@ -295,6 +314,9 @@ a:focus-visible {
   color: var(--muted-2);
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  max-width: 50%;
+  text-align: right;
+  white-space: normal;
 }
 
 .card:hover {
