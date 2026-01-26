@@ -303,10 +303,9 @@ a:focus-visible {
 
 .film-card-footer {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 0.8rem;
-  flex-wrap: wrap;
 }
 
 .film-card-genres {
@@ -314,9 +313,11 @@ a:focus-visible {
   color: var(--muted-2);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  max-width: 50%;
+  max-width: 55%;
   text-align: right;
-  white-space: normal;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .card:hover {
