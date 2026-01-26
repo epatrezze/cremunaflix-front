@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import type { Film, Session } from '../../contracts';
 import Badge from './Badge';
 import { formatDate } from '../../domain/format';
@@ -30,8 +31,13 @@ const Hero = ({ film, session, onSelect }: HeroProps) => {
     );
   }
 
+  const heroStyle: CSSProperties = {
+    '--hero-backdrop': film.backdrop,
+    '--hero-accent': film.accentColor
+  };
+
   return (
-    <section className="hero" style={{ backgroundImage: `${film.backdrop}, var(--hero-image)` }}>
+    <section className="hero" style={heroStyle}>
       <div className="hero-content reveal">
         <Badge label="Proxima sessao" />
         <h1>{film.title}</h1>

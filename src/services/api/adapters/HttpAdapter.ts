@@ -1,15 +1,26 @@
 import type {
   ApiClient,
   CatalogQuery,
+  CatalogStatusFilter,
   CreateRequestPayload,
   PastSessionsQuery,
   RequestListQuery
 } from '../ApiClient';
-import type { ApiError, Film, PaginatedResponse, Request, Session } from '../../../contracts';
+import type { ApiError, Movie, PaginatedResponse, Request, Session } from '../../../contracts';
 import type { AuthTokenProvider } from '../auth';
 import { NullAuthTokenProvider } from '../auth';
 
 const DEFAULT_TIMEOUT_MS = 10000;
+
+const normalizeCatalogStatus = (status?: CatalogStatusFilter) => {
+  if (!status) {
+    return undefined;
+  }
+  if (status === 'SCREENED') {
+    return 'EXHIBITED';
+  }
+  return status;
+};
 
 export class HttpAdapter implements ApiClient {
   private baseUrl: string;
@@ -103,12 +114,13 @@ export class HttpAdapter implements ApiClient {
     return { code: `HTTP_${status}`, message: 'Request failed' };
   }
 
-  async getCatalog(query: CatalogQuery = {}): Promise<PaginatedResponse<Film>> {
+  async getCatalog(query: CatalogQuery = {}): Promise<PaginatedResponse<Movie>> {
     const params = new URLSearchParams();
     if (query.query) params.set('query', query.query);
     if (query.genre) params.set('genre', query.genre);
     if (query.year) params.set('year', String(query.year));
-    if (query.status) params.set('status', query.status);
+    const status = normalizeCatalogStatus(query.status);
+    if (status) params.set('status', status);
     if (query.page) params.set('page', String(query.page));
     if (query.pageSize) params.set('pageSize', String(query.pageSize));
 
@@ -116,7 +128,7 @@ export class HttpAdapter implements ApiClient {
     return this.request(`/api/v1/catalog${suffix ? `?${suffix}` : ''}`);
   }
 
-  async getFilmById(id: string): Promise<Film> {
+  async getFilmById(id: string): Promise<Movie> {
     return this.request(`/api/v1/films/${id}`);
   }
 

@@ -9,6 +9,7 @@ export const apiClient = USE_MOCK ? new MockAdapter() : new HttpAdapter();
 export type {
   ApiClient,
   CatalogQuery,
+  CatalogStatusFilter,
   PastSessionsQuery,
   RequestListQuery,
   CreateRequestPayload

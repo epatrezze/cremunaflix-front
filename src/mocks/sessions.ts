@@ -3,7 +3,7 @@ import type { Session } from '../contracts';
 export const sessions: Session[] = [
   {
     id: 'session-001',
-    filmId: 'film-003',
+    filmId: 'a0B000000003EAAQ',
     startsAt: '2024-09-05T20:00:00-03:00',
     status: 'UPCOMING',
     host: 'Equipe Cremuna',
@@ -12,7 +12,7 @@ export const sessions: Session[] = [
   },
   {
     id: 'session-002',
-    filmId: 'film-008',
+    filmId: 'a0B000000008EAAQ',
     startsAt: '2024-09-12T20:30:00-03:00',
     status: 'UPCOMING',
     host: 'Clube Sci-Fi',
@@ -21,7 +21,7 @@ export const sessions: Session[] = [
   },
   {
     id: 'session-003',
-    filmId: 'film-011',
+    filmId: 'a0B000000011EAAQ',
     startsAt: '2024-09-20T21:00:00-03:00',
     status: 'UPCOMING',
     host: 'Equipe Cremuna',
@@ -29,7 +29,7 @@ export const sessions: Session[] = [
   },
   {
     id: 'session-004',
-    filmId: 'film-015',
+    filmId: 'a0B000000012EAAQ',
     startsAt: '2024-10-03T20:00:00-03:00',
     status: 'UPCOMING',
     host: 'Curadoria Noir',
@@ -37,7 +37,7 @@ export const sessions: Session[] = [
   },
   {
     id: 'session-005',
-    filmId: 'film-006',
+    filmId: 'a0B000000006EAAQ',
     startsAt: '2024-07-19T20:00:00-03:00',
     status: 'PAST',
     host: 'Equipe Cremuna',
@@ -45,7 +45,7 @@ export const sessions: Session[] = [
   },
   {
     id: 'session-006',
-    filmId: 'film-010',
+    filmId: 'a0B000000010EAAQ',
     startsAt: '2024-07-04T21:00:00-03:00',
     status: 'PAST',
     host: 'Clube Cyber',
@@ -53,7 +53,7 @@ export const sessions: Session[] = [
   },
   {
     id: 'session-007',
-    filmId: 'film-002',
+    filmId: 'a0B000000002EAAQ',
     startsAt: '2024-06-14T20:00:00-03:00',
     status: 'PAST',
     host: 'Equipe Cremuna',
@@ -61,7 +61,7 @@ export const sessions: Session[] = [
   },
   {
     id: 'session-008',
-    filmId: 'film-016',
+    filmId: 'a0B000000009EAAQ',
     startsAt: '2024-05-31T20:00:00-03:00',
     status: 'PAST',
     host: 'Curadoria Romance',

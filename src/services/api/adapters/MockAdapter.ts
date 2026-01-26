@@ -1,16 +1,35 @@
 import type {
   ApiClient,
   CatalogQuery,
+  CatalogStatusFilter,
   CreateRequestPayload,
   PastSessionsQuery,
   RequestListQuery
 } from '../ApiClient';
-import type { PaginatedResponse, Request } from '../../../contracts';
-import { films, requests, sessions } from '../../../mocks';
+import type { Movie, PaginatedResponse, Request } from '../../../contracts';
+import { movies, requests, sessions } from '../../../mocks';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const createId = () => `req-${Date.now().toString(36)}`;
+
+const normalizeCatalogStatus = (status?: CatalogStatusFilter) => {
+  if (!status) {
+    return undefined;
+  }
+  if (status === 'SCREENED') {
+    return 'EXHIBITED';
+  }
+  return status;
+};
+
+const parseYear = (releaseDate?: string | null) => {
+  if (!releaseDate) {
+    return null;
+  }
+  const year = Number(releaseDate.slice(0, 4));
+  return Number.isNaN(year) ? null : year;
+};
 
 const paginate = <T>(items: T[], page = 1, pageSize = 20): PaginatedResponse<T> => {
   const start = (page - 1) * pageSize;
@@ -29,16 +48,21 @@ export class MockAdapter implements ApiClient {
     this.requestStore = [...requests];
   }
 
-  async getCatalog(query: CatalogQuery = {}) {
+  async getCatalog(query: CatalogQuery = {}): Promise<PaginatedResponse<Movie>> {
     await delay(220);
     const normalizedQuery = query.query?.toLowerCase().trim();
-    const filtered = films.filter((film) => {
+    const status = normalizeCatalogStatus(query.status);
+    const filtered = movies.filter((movie) => {
       const matchesQuery = normalizedQuery
-        ? film.title.toLowerCase().includes(normalizedQuery)
+        ? movie.title.toLowerCase().includes(normalizedQuery) ||
+          (movie.originalTitle ?? '').toLowerCase().includes(normalizedQuery)
         : true;
-      const matchesGenre = query.genre ? film.genres.includes(query.genre) : true;
-      const matchesYear = query.year ? film.year === query.year : true;
-      const matchesStatus = query.status ? film.status === query.status : true;
+      const matchesGenre = query.genre
+        ? movie.genres?.some((genre) => genre.name === query.genre)
+        : true;
+      const movieYear = movie.releaseYear ?? parseYear(movie.releaseDate);
+      const matchesYear = query.year ? movieYear === query.year : true;
+      const matchesStatus = status ? movie.status === status : true;
       return matchesQuery && matchesGenre && matchesYear && matchesStatus;
     });
 
@@ -47,11 +71,11 @@ export class MockAdapter implements ApiClient {
 
   async getFilmById(id: string) {
     await delay(200);
-    const film = films.find((item) => item.id === id);
-    if (!film) {
-      throw new Error(`Film not found: ${id}`);
+    const movie = movies.find((item) => item.id === id);
+    if (!movie) {
+      throw new Error(`Movie not found: ${id}`);
     }
-    return film;
+    return movie;
   }
 
   async getUpcomingSessions() {

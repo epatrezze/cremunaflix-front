@@ -1,6 +1,7 @@
 import type { ApiClient, CatalogQuery } from '../../services';
 import type { Film, PaginatedResponse } from '../../contracts';
 import { apiClient } from '../../services';
+import { adaptMoviePageToFilms, adaptMovieToFilm } from '../movieAdapter';
 
 /**
  * Repository for catalog/film data access.
@@ -15,15 +16,17 @@ export class CatalogRepository {
   /**
    * Returns paginated catalog results.
    */
-  getCatalog(query?: CatalogQuery): Promise<PaginatedResponse<Film>> {
-    return this.client.getCatalog(query);
+  async getCatalog(query?: CatalogQuery): Promise<PaginatedResponse<Film>> {
+    const page = await this.client.getCatalog(query);
+    return adaptMoviePageToFilms(page);
   }
 
   /**
    * Returns a single film by id.
    */
-  getFilmById(id: string): Promise<Film> {
-    return this.client.getFilmById(id);
+  async getFilmById(id: string): Promise<Film> {
+    const movie = await this.client.getFilmById(id);
+    return adaptMovieToFilm(movie);
   }
 }
 

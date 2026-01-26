@@ -11,4 +11,5 @@ export interface Film {
   status: FilmStatus;
   accentColor: string;
   backdrop: string;
+  poster?: string;
 }
