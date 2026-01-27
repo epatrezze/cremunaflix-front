@@ -12,4 +12,5 @@ export interface Film {
   accentColor: string;
   backdrop: string;
   poster?: string;
+  certification?: string | null;
 }

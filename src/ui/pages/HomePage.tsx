@@ -116,8 +116,11 @@ const HomePage = () => {
   return (
     <section>
       <Hero
-        film={nextSessionFilm}
-        session={nextSession || null}
+        items={
+          nextSessionFilm
+            ? [nextSessionFilm, ...films.filter((film) => film.id !== nextSessionFilm.id)]
+            : films
+        }
         onSelect={setSelectedFilm}
       />
       {loading ? (

@@ -71,7 +71,8 @@ export const adaptMovieToFilm = (movie: Movie): Film => {
     status: normalizeStatus(movie.status ?? undefined),
     accentColor: normalizeAccent(movie),
     backdrop: normalizeBackdrop(movie),
-    poster: normalizePoster(movie)
+    poster: normalizePoster(movie),
+    certification: movie.certification ?? null
   };
 };
 
