@@ -121,6 +121,7 @@ const HomePage = () => {
             ? [nextSessionFilm, ...films.filter((film) => film.id !== nextSessionFilm.id)]
             : films
         }
+        loading={loading}
         onSelect={setSelectedFilm}
       />
       {loading ? (

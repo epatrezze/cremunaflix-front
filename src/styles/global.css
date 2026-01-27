@@ -27,6 +27,7 @@
   --bg-glow-3: rgba(255, 209, 92, 0.2);
   --navbar-bg: rgba(11, 11, 18, 0.95);
   --navbar-bg-transparent: rgba(11, 11, 18, 0);
+  --edge-fade: rgba(11, 12, 20, 0.85);
   --hero-image-web: url('../assets/cineclub/dark/header-web.webp');
   --hero-image-mobile: url('../assets/cineclub/dark/header-mobile.webp');
   --hero-image: var(--hero-image-web);
@@ -55,6 +56,7 @@
   --bg-glow-3: rgba(220, 190, 120, 0.16);
   --navbar-bg: rgba(248, 246, 240, 0.9);
   --navbar-bg-transparent: rgba(248, 246, 240, 0);
+  --edge-fade: rgba(246, 244, 239, 0.85);
   --hero-image-web: url('../assets/cineclub/light/header-web.webp');
   --hero-image-mobile: url('../assets/cineclub/light/header-mobile.webp');
   --hero-image: var(--hero-image-web);
@@ -279,6 +281,11 @@ a:focus-visible {
   transition: border 0.2s ease, transform 0.2s ease, background 0.2s ease;
 }
 
+.button-primary:focus-visible,
+.button-ghost:focus-visible {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.7);
+}
+
 .button-ghost:hover {
   border-color: rgba(255, 255, 255, 0.4);
   background: rgba(17, 19, 32, 0.75);
@@ -313,10 +320,13 @@ a:focus-visible {
 }
 
 .film-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0;
-  min-height: 380px;
+  min-height: 360px;
+  overflow: hidden;
+  transform-origin: center;
 }
 
 .film-card::after {
@@ -326,20 +336,16 @@ a:focus-visible {
   background: radial-gradient(circle at top right, var(--card-accent), transparent 55%);
   opacity: 0.12;
   pointer-events: none;
-  z-index: 0;
-}
-
-.film-card > * {
-  position: relative;
   z-index: 1;
 }
 
 .film-card-media {
-  min-height: 170px;
+  min-height: 360px;
   position: relative;
   background: var(--card-backdrop);
   background-size: cover;
   background-position: center;
+  filter: saturate(1.05);
 }
 
 .film-card-media::after {
@@ -347,94 +353,88 @@ a:focus-visible {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: linear-gradient(180deg, rgba(7, 9, 16, 0.1) 0%, rgba(7, 9, 16, 0.7) 100%);
+  background: linear-gradient(180deg, rgba(7, 9, 16, 0.1) 0%, rgba(7, 9, 16, 0.85) 100%);
 }
 
-.film-card-rating {
+.film-card-overlay {
   position: absolute;
-  top: 12px;
-  left: 12px;
-  z-index: 1;
-  background: rgba(10, 12, 22, 0.78);
-  padding: 0.35rem 0.6rem;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  inset: 0;
+  padding: 1.2rem;
+  display: grid;
+  gap: 0.6rem;
+  align-content: end;
+  background: linear-gradient(180deg, rgba(7, 9, 16, 0) 30%, rgba(7, 9, 16, 0.92) 100%);
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 2;
 }
 
-.film-card-body {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 0.6rem;
-  padding: 1.1rem 1.2rem 1.3rem;
+.film-card-badge {
+  justify-self: start;
 }
 
 .film-card-title {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.8rem;
-}
-
-.film-card-title h3 {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   line-height: 1.2;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: 2.4em;
-}
-
-.film-card-title .badge {
-  flex-shrink: 0;
-  margin-top: 0.15rem;
 }
 
 .film-card-meta {
   color: var(--muted-2);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
-.film-card-synopsis {
+.film-card-overview {
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: 4.2em;
-}
-
-.film-card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.8rem;
-}
-
-.film-card .button-ghost {
-  padding: 0.45rem 0.95rem;
-  font-size: 0.85rem;
 }
 
 .film-card-genres {
-  font-size: 0.75rem;
-  color: var(--muted-2);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  max-width: 55%;
-  text-align: right;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.film-card-genre-chip {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.film-card-action {
+  justify-self: start;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.8rem;
 }
 
 .card:hover {
   transform: translateY(-8px);
   box-shadow: var(--shadow-strong);
   border-color: rgba(255, 255, 255, 0.2);
+}
+
+.film-card:hover,
+.film-card:focus-within {
+  transform: translateY(-6px) scale(1.04);
+  z-index: 3;
+}
+
+.film-card:hover .film-card-overlay,
+.film-card:focus-within .film-card-overlay {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
 }
 
 .page-title {
@@ -451,6 +451,31 @@ a:focus-visible {
 .carousel {
   position: relative;
   margin-bottom: 2.5rem;
+}
+
+.carousel-shell {
+  position: relative;
+}
+
+.carousel-shell::before,
+.carousel-shell::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 48px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.carousel-shell::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--edge-fade), transparent);
+}
+
+.carousel-shell::after {
+  right: 0;
+  background: linear-gradient(-90deg, var(--edge-fade), transparent);
 }
 
 .carousel-track {
@@ -477,6 +502,45 @@ a:focus-visible {
 
 .carousel-item {
   scroll-snap-align: start;
+}
+
+.carousel-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(12, 14, 22, 0.6);
+  color: var(--text);
+  font-size: 1.8rem;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
+  transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+
+.carousel-prev {
+  left: 0.4rem;
+}
+
+.carousel-next {
+  right: 0.4rem;
+}
+
+.carousel-nav:hover {
+  background: rgba(12, 14, 22, 0.85);
+}
+
+.carousel:hover .carousel-nav,
+.carousel:focus-within .carousel-nav {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(-50%) scale(1.02);
 }
 
 .grid {
@@ -533,6 +597,34 @@ a:focus-visible {
   gap: 0.9rem;
   max-width: 620px;
   padding: clamp(1.8rem, 4vw, 3.2rem);
+}
+
+.hero-loading .hero-info {
+  gap: 0.8rem;
+}
+
+.hero-loading .hero-info .skeleton-line {
+  height: 14px;
+}
+
+.hero-skeleton-title {
+  height: 28px;
+  width: 60%;
+  border-radius: 999px;
+}
+
+.hero-skeleton-meta {
+  width: 45%;
+}
+
+.hero-skeleton-overview {
+  width: 70%;
+}
+
+.hero-skeleton-button {
+  width: 120px;
+  height: 40px;
+  border-radius: 999px;
 }
 
 .hero-info h1 {
@@ -844,10 +936,11 @@ a:focus-visible {
   display: grid;
   gap: 1rem;
   padding: 1rem;
+  min-height: 320px;
 }
 
 .skeleton-media {
-  height: 140px;
+  height: 200px;
   border-radius: var(--radius-sm);
 }
 
@@ -859,6 +952,10 @@ a:focus-visible {
 .skeleton-line {
   height: 12px;
   border-radius: 999px;
+}
+
+.skeleton-line.medium {
+  width: 75%;
 }
 
 .skeleton-line.short {
@@ -946,6 +1043,29 @@ a:focus-visible {
 
   .carousel-track {
     grid-auto-columns: minmax(180px, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .hero-track {
+    transition: none !important;
+  }
+
+  .film-card:hover,
+  .film-card:focus-within,
+  .card:hover,
+  .button-primary:hover,
+  .button-ghost:hover {
+    transform: none !important;
   }
 }
 .theme-toggle {

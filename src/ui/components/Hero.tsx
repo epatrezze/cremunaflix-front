@@ -8,6 +8,7 @@ import Badge from './Badge';
  */
 interface HeroProps {
   items: Film[];
+  loading?: boolean;
   onSelect?: (film: Film) => void;
 }
 
@@ -17,7 +18,7 @@ interface HeroProps {
  * @param props - Hero props.
  * @returns Hero section or fallback when no session exists.
  */
-const Hero = ({ items, onSelect }: HeroProps) => {
+const Hero = ({ items, loading = false, onSelect }: HeroProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const hasItems = items.length > 0;
 
@@ -41,6 +42,23 @@ const Hero = ({ items, onSelect }: HeroProps) => {
     if (!heroItems.length) return;
     setActiveIndex((prev) => (prev + 1) % heroItems.length);
   };
+
+  if (loading) {
+    return (
+      <section className="hero-carousel hero-loading" aria-busy="true">
+        <div className="hero-info">
+          <span className="skeleton skeleton-line hero-skeleton-title" />
+          <span className="skeleton skeleton-line hero-skeleton-meta" />
+          <span className="skeleton skeleton-line hero-skeleton-overview" />
+          <span className="skeleton skeleton-line hero-skeleton-overview short" />
+          <div className="hero-actions">
+            <span className="skeleton hero-skeleton-button" />
+            <span className="skeleton hero-skeleton-button" />
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   if (!heroItems.length) {
     return (

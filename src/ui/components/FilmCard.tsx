@@ -18,10 +18,15 @@ interface FilmCardProps {
  */
 const FilmCard = ({ film, onSelect }: FilmCardProps) => {
   const cardBackdrop = film.poster ? `url(${film.poster})` : film.backdrop;
+  const metaPieces = [
+    film.year ? String(film.year) : null,
+    film.durationMinutes ? `${film.durationMinutes} min` : null,
+    film.certification ? `Classificacao ${film.certification}` : null
+  ].filter(Boolean);
 
   return (
     <article
-      className="card film-card flex flex-col overflow-hidden"
+      className="card film-card"
       style={
         {
           borderColor: `${film.accentColor}33`,
@@ -30,31 +35,32 @@ const FilmCard = ({ film, onSelect }: FilmCardProps) => {
         } as CSSProperties
       }
     >
-    <div className="film-card-media relative">
-      <span className="film-card-rating absolute left-3 top-3 text-xs font-semibold">
-        {film.rating.toFixed(1)}
-      </span>
-    </div>
-    <div className="film-card-body flex flex-1 flex-col gap-2 p-5">
-      <div className="film-card-title flex items-center justify-between gap-3">
-        <h3>{film.title}</h3>
-        <Badge label={film.status === 'SCREENED' ? 'Exibido' : 'Agendado'} />
-      </div>
-      <p className="film-card-meta text-sm">
-        {film.year} - {film.durationMinutes} min
-      </p>
-      <p className="film-card-synopsis text-sm leading-relaxed">{film.synopsis}</p>
-      <div className="film-card-footer mt-auto flex items-center justify-between gap-3">
+      <div className="film-card-media" aria-hidden="true" />
+      <div className="film-card-overlay">
+        <div className="film-card-badge">
+          <Badge label={film.status === 'SCREENED' ? 'Exibido' : 'Agendado'} />
+        </div>
+        <h3 className="film-card-title">{film.title}</h3>
+        {metaPieces.length > 0 && <p className="film-card-meta">{metaPieces.join(' • ')}</p>}
+        <p className="film-card-overview">{film.synopsis}</p>
+        {film.genres.length > 0 && (
+          <div className="film-card-genres" aria-hidden="true">
+            {film.genres.slice(0, 3).map((genre) => (
+              <span key={genre} className="film-card-genre-chip">
+                {genre}
+              </span>
+            ))}
+          </div>
+        )}
         <button
-          className="button-ghost"
+          className="button-ghost film-card-action"
+          type="button"
           onClick={() => onSelect(film)}
           aria-label={`Ver detalhes de ${film.title}`}
         >
           Ver detalhes
         </button>
-        <span className="film-card-genres">{film.genres.join(' / ')}</span>
       </div>
-    </div>
     </article>
   );
 };
