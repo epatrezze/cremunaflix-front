@@ -6,8 +6,9 @@ export interface MovieImageSet {
 }
 
 export interface MovieGenre {
-  id: number;
+  id: number | string;
   name: string;
+  tmdbId?: number | null;
 }
 
 export interface MovieMetrics {

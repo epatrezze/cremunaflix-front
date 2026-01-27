@@ -32,10 +32,10 @@ const normalizeStatus = (status?: MovieStatus | null): FilmStatus => {
   if (status === 'EXHIBITED') {
     return 'SCREENED';
   }
-  if (status === 'SCHEDULED') {
+  if (status === 'SCHEDULED' || status === 'UPCOMING') {
     return 'SCHEDULED';
   }
-  return 'SCHEDULED';
+  return 'SCREENED';
 };
 
 const hashToHue = (value: string) => {
