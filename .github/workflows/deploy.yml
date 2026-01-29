@@ -34,6 +34,8 @@ jobs:
         env:
           GITHUB_PAGES: 'true'
           VITE_BASE: /${{ github.event.repository.name }}/
+          VITE_USE_MOCK: 'false'
+          VITE_SF_API_BASE_URL: ${{ secrets.VITE_SF_API_BASE_URL }}
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
