@@ -74,12 +74,15 @@ export const fetchJson = async <T>(
       signal: controller.signal
     });
 
+    const body = await readBody(response);
+
     if (!response.ok) {
-      const errorBody = await readBody(response);
-      throw toApiError(response.status, errorBody);
+      console.info('[API]', response.status, `${baseUrl}${path}`, body);
+      throw toApiError(response.status, body);
     }
 
-    return (await readBody(response)) as T;
+    console.info('[API]', response.status, `${baseUrl}${path}`, body);
+    return body as T;
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') {
       throw { code: 'TIMEOUT', message: 'Request timed out', details: path } satisfies ApiErrorDto;
