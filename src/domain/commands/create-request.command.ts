@@ -21,6 +21,7 @@ export class CreateRequestCommand {
 
   async execute(payload: CreateRequestPayload): Promise<CreateRequestResult> {
     const title = payload.title.trim();
+    const requestedById = payload.requestedById.trim();
     const reason = payload.reason.trim();
     const link = payload.link.trim();
 
@@ -28,6 +29,13 @@ export class CreateRequestCommand {
       return {
         ok: false,
         error: { code: 'VALIDATION_ERROR', message: 'Titulo obrigatorio.' }
+      };
+    }
+
+    if (!requestedById) {
+      return {
+        ok: false,
+        error: { code: 'VALIDATION_ERROR', message: 'Identificador obrigatorio.' }
       };
     }
 
@@ -50,7 +58,7 @@ export class CreateRequestCommand {
     }
 
     try {
-      const created = await this.repository.createRequest({ title, link, reason });
+      const created = await this.repository.createRequest({ title, link, reason, requestedById });
       return { ok: true, data: created };
     } catch (error) {
       if (isApiError(error)) {

@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
-import type { Film, Session, Request } from '../../contracts';
+import { useEffect, useState } from 'react';
+import type { Film } from '../../contracts';
+import { getHome } from '../../api/services';
+import { normalizeMovieDto, normalizeSessionDto } from '../../domain/dtoAdapters';
+import { adaptMovieToFilm } from '../../domain/movieAdapter';
 import { catalogRepository } from '../../domain/repositories/catalog.repository';
 import { sessionsRepository } from '../../domain/repositories/sessions.repository';
-import { requestsRepository } from '../../domain/repositories/requests.repository';
 import Hero from '../components/Hero';
 import CarouselRow from '../components/CarouselRow';
 import FilmModal from '../components/FilmModal';
@@ -15,14 +17,15 @@ import EmptyState from '../components/EmptyState';
  * @returns Home page section.
  */
 const HomePage = () => {
-  const [films, setFilms] = useState<Film[]>([]);
-  const [sessions, setSessions] = useState<Session[]>([]);
-  const [requests, setRequests] = useState<Request[]>([]);
+  const [heroFilms, setHeroFilms] = useState<Film[]>([]);
+  const [lastExhibited, setLastExhibited] = useState<Film[]>([]);
+  const [mostRequested, setMostRequested] = useState<Film[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reloadToken, setReloadToken] = useState(0);
   const [selectedFilm, setSelectedFilm] = useState<Film | null>(null);
   const handleRetry = () => setReloadToken((prev) => prev + 1);
+  const useMock = import.meta.env.VITE_USE_MOCK !== 'false';
 
   useEffect(() => {
     let mounted = true;
@@ -30,15 +33,59 @@ const HomePage = () => {
       setLoading(true);
       setError(null);
       try {
-        const [filmData, sessionData, requestData] = await Promise.all([
-          catalogRepository.getCatalog(),
-          sessionsRepository.getUpcomingSessions(),
-          requestsRepository.listRequests()
-        ]);
-        if (mounted) {
-          setFilms(filmData.items);
-          setSessions(sessionData);
-          setRequests(requestData.items);
+        if (useMock) {
+          const [filmData, sessionData] = await Promise.all([
+            catalogRepository.getCatalog(),
+            sessionsRepository.getUpcomingSessions(),
+          ]);
+          const films = filmData.items;
+          const nextSession = sessionData
+            .filter((session) => session.status === 'UPCOMING')
+            .sort((a, b) => a.startsAt.localeCompare(b.startsAt))[0];
+          const nextSessionFilm = nextSession
+            ? films.find((film) => film.id === nextSession.filmId) || null
+            : null;
+          const latestScreened = films
+            .filter((film) => film.status === 'SCREENED')
+            .sort((a, b) => b.year - a.year)
+            .slice(0, 8);
+          const ranked = [...films].sort((a, b) => b.rating - a.rating);
+          const mostRequestedLocal = ranked.slice(0, 8);
+
+          if (mounted) {
+            setHeroFilms(
+              nextSessionFilm
+                ? [nextSessionFilm, ...films.filter((film) => film.id !== nextSessionFilm.id)]
+                : films
+            );
+            setLastExhibited(latestScreened);
+            setMostRequested(mostRequestedLocal);
+          }
+        } else {
+          const home = await getHome();
+          const lastExhibitedFilms = home.lastExhibited.map((item) =>
+            adaptMovieToFilm(normalizeMovieDto(item))
+          );
+          const mostRequestedFilms = home.mostRequested.map((item) =>
+            adaptMovieToFilm(normalizeMovieDto(item))
+          );
+          const filmIndex = new Map<string, Film>();
+          [...lastExhibitedFilms, ...mostRequestedFilms].forEach((film) => {
+            filmIndex.set(film.id, film);
+          });
+          const heroSessions = home.hero?.items ?? [];
+          const heroFilmsFromSessions = heroSessions
+            .map((session) => normalizeSessionDto(session).filmId)
+            .map((id) => filmIndex.get(id))
+            .filter(Boolean) as Film[];
+
+          if (mounted) {
+            const fallbackFilms =
+              lastExhibitedFilms.length > 0 ? lastExhibitedFilms : mostRequestedFilms;
+            setHeroFilms(heroFilmsFromSessions.length > 0 ? heroFilmsFromSessions : fallbackFilms);
+            setLastExhibited(lastExhibitedFilms);
+            setMostRequested(mostRequestedFilms);
+          }
         }
       } catch (err) {
         if (mounted) {
@@ -59,35 +106,8 @@ const HomePage = () => {
     return () => {
       mounted = false;
     };
-  }, [reloadToken]);
+  }, [reloadToken, useMock]);
 
-  const nextSession = useMemo(() => {
-    return sessions
-      .filter((session) => session.status === 'UPCOMING')
-      .sort((a, b) => a.startsAt.localeCompare(b.startsAt))[0];
-  }, [sessions]);
-
-  const nextSessionFilm = useMemo(() => {
-    if (!nextSession) {
-      return null;
-    }
-    return films.find((film) => film.id === nextSession.filmId) || null;
-  }, [films, nextSession]);
-
-  const latestScreened = useMemo(() => {
-    return films
-      .filter((film) => film.status === 'SCREENED')
-      .sort((a, b) => b.year - a.year)
-      .slice(0, 8);
-  }, [films]);
-
-  const mostRequested = useMemo(() => {
-    const ranked = [...films].sort((a, b) => b.rating - a.rating);
-    if (requests.length > 0) {
-      return ranked.slice(0, 8);
-    }
-    return ranked.slice(0, 8);
-  }, [films, requests]);
 
   /**
    * Renders a skeleton carousel section while data loads.
@@ -116,11 +136,7 @@ const HomePage = () => {
   return (
     <section>
       <Hero
-        items={
-          nextSessionFilm
-            ? [nextSessionFilm, ...films.filter((film) => film.id !== nextSessionFilm.id)]
-            : films
-        }
+        items={heroFilms}
         loading={loading}
         onSelect={setSelectedFilm}
       />
@@ -137,7 +153,7 @@ const HomePage = () => {
           actionLabel="Tentar novamente"
           onAction={handleRetry}
         />
-      ) : latestScreened.length === 0 ? (
+      ) : lastExhibited.length === 0 ? (
         <EmptyState
           title="Nada exibido ainda"
           description="Assim que as sessoes acontecerem, os titulos aparecem aqui."
@@ -146,7 +162,7 @@ const HomePage = () => {
         <CarouselRow
           title="Ultimas exibidas"
           subtitle="Reprises comentadas das ultimas semanas"
-          items={latestScreened}
+          items={lastExhibited}
           onSelect={setSelectedFilm}
         />
       )}

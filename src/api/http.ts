@@ -1,8 +1,4 @@
-type ApiErrorDto = {
-  code: string;
-  message: string;
-  details?: string;
-};
+import type { ErrorDTO } from '../types/dtos';
 
 export type ApiRequestOptions = {
   baseUrl?: string;
@@ -10,10 +6,31 @@ export type ApiRequestOptions = {
 };
 
 const DEFAULT_TIMEOUT_MS = 10000;
+const API_PREFIX = '/api/v1';
 
 const resolveBaseUrl = (baseUrl?: string) => {
-  const raw = baseUrl ?? import.meta.env.VITE_SF_API_BASE_URL ?? '';
+  const raw = baseUrl ?? import.meta.env.VITE_API_BASE_URL ?? '';
   return raw.replace(/\/$/, '');
+};
+
+const joinPath = (baseUrl: string, path: string) => {
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${baseUrl}${API_PREFIX}${cleanPath}`;
+};
+
+export const withQuery = (
+  path: string,
+  params: Record<string, string | number | boolean | null | undefined>
+) => {
+  const search = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === undefined || value === null) {
+      return;
+    }
+    search.set(key, String(value));
+  });
+  const suffix = search.toString();
+  return suffix ? `${path}?${suffix}` : path;
 };
 
 const readBody = async (response: Response) => {
@@ -33,21 +50,22 @@ const readBody = async (response: Response) => {
   return response.text();
 };
 
-const toApiError = (status: number, body: unknown): ApiErrorDto => {
+const toApiError = (status: number, body: unknown): ErrorDTO & { status: number } => {
   if (body && typeof body === 'object') {
-    const maybeError = body as Partial<ApiErrorDto>;
+    const maybeError = body as Partial<ErrorDTO>;
     return {
+      status,
       code: maybeError.code ?? `HTTP_${status}`,
       message: maybeError.message ?? 'Request failed',
-      details: maybeError.details
+      details: maybeError.details ?? null
     };
   }
 
   if (typeof body === 'string' && body.trim()) {
-    return { code: `HTTP_${status}`, message: body };
+    return { status, code: `HTTP_${status}`, message: body, details: null };
   }
 
-  return { code: `HTTP_${status}`, message: 'Request failed' };
+  return { status, code: `HTTP_${status}`, message: 'Request failed', details: null };
 };
 
 export const fetchJson = async <T>(
@@ -56,6 +74,7 @@ export const fetchJson = async <T>(
   options: ApiRequestOptions = {}
 ): Promise<T> => {
   const baseUrl = resolveBaseUrl(options.baseUrl);
+  const url = joinPath(baseUrl, path);
   const controller = new AbortController();
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -63,11 +82,9 @@ export const fetchJson = async <T>(
   try {
     const headers = new Headers(init.headers);
     headers.set('Accept', 'application/json');
-    if (init.body && !headers.has('Content-Type')) {
-      headers.set('Content-Type', 'application/json');
-    }
+    headers.set('Content-Type', 'application/json');
 
-    const response = await fetch(`${baseUrl}${path}`, {
+    const response = await fetch(url, {
       ...init,
       headers,
       credentials: 'omit',
@@ -77,15 +94,25 @@ export const fetchJson = async <T>(
     const body = await readBody(response);
 
     if (!response.ok) {
-      console.info('[API]', response.status, `${baseUrl}${path}`, body);
+      const safePayload =
+        body && typeof body === 'object'
+          ? {
+              code: (body as { code?: string }).code,
+              message: (body as { message?: string }).message,
+              details: (body as { details?: string | null }).details ?? null
+            }
+          : body;
+      console.error('[API]', response.status, url, safePayload);
       throw toApiError(response.status, body);
     }
 
-    console.info('[API]', response.status, `${baseUrl}${path}`, body);
+    console.info('[API]', response.status, url, body);
     return body as T;
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') {
-      throw { code: 'TIMEOUT', message: 'Request timed out', details: path } satisfies ApiErrorDto;
+      throw { status: 0, code: 'TIMEOUT', message: 'Request timed out', details: path } satisfies ErrorDTO & {
+        status: number;
+      };
     }
 
     if (error && typeof error === 'object' && 'code' in error) {
@@ -93,10 +120,11 @@ export const fetchJson = async <T>(
     }
 
     throw {
+      status: 0,
       code: 'NETWORK_ERROR',
       message: 'Network error',
       details: String(error)
-    } satisfies ApiErrorDto;
+    } satisfies ErrorDTO & { status: number };
   } finally {
     clearTimeout(timeoutId);
   }

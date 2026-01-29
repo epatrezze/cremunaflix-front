@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import type { Film, FilmStatus } from '../../contracts';
+import type { Film, FilmStatus, Movie } from '../../contracts';
 import { catalogRepository } from '../../domain/repositories/catalog.repository';
+import { apiClient } from '../../services';
 import FilterBar from '../components/FilterBar';
 import FilmCard from '../components/FilmCard';
 import FilmModal from '../components/FilmModal';
@@ -16,14 +17,14 @@ import EmptyState from '../components/EmptyState';
 const CatalogPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [films, setFilms] = useState<Film[]>([]);
-  const [allFilms, setAllFilms] = useState<Film[]>([]);
+  const [allMovies, setAllMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reloadToken, setReloadToken] = useState(0);
   const [selectedFilm, setSelectedFilm] = useState<Film | null>(null);
   const [filters, setFilters] = useState({
     search: searchParams.get('query') ?? '',
-    genre: searchParams.get('genre') ?? '',
+    genreId: searchParams.get('genreId') ?? '',
     year: searchParams.get('year') ?? '',
     status: searchParams.get('status') ?? ''
   });
@@ -33,14 +34,14 @@ const CatalogPage = () => {
 
   const areFiltersEqual = (next: typeof filters) =>
     next.search === filters.search &&
-    next.genre === filters.genre &&
+    next.genreId === filters.genreId &&
     next.year === filters.year &&
     next.status === filters.status;
 
   useEffect(() => {
     const nextFilters = {
       search: searchParams.get('query') ?? '',
-      genre: searchParams.get('genre') ?? '',
+      genreId: searchParams.get('genreId') ?? '',
       year: searchParams.get('year') ?? '',
       status: searchParams.get('status') ?? ''
     };
@@ -59,23 +60,23 @@ const CatalogPage = () => {
   useEffect(() => {
     const params = new URLSearchParams();
     if (debouncedSearch) params.set('query', debouncedSearch);
-    if (filters.genre) params.set('genre', filters.genre);
+    if (filters.genreId) params.set('genreId', filters.genreId);
     if (filters.year) params.set('year', filters.year);
     if (filters.status) params.set('status', filters.status);
     setSearchParams(params, { replace: true });
-  }, [debouncedSearch, filters.genre, filters.year, filters.status, setSearchParams]);
+  }, [debouncedSearch, filters.genreId, filters.year, filters.status, setSearchParams]);
 
   useEffect(() => {
     let mounted = true;
     const loadAll = async () => {
       try {
-        const data = await catalogRepository.getCatalog({ pageSize: 200 });
+        const data = await apiClient.getCatalog({ pageSize: 100 });
         if (mounted) {
-          setAllFilms(data.items);
+          setAllMovies(data.items);
         }
       } catch {
         if (mounted) {
-          setAllFilms([]);
+          setAllMovies([]);
         }
       }
     };
@@ -86,16 +87,30 @@ const CatalogPage = () => {
   }, [reloadToken]);
 
   const genres = useMemo(() => {
-    const set = new Set<string>();
-    allFilms.forEach((film) => film.genres.forEach((genre) => set.add(genre)));
-    return Array.from(set).sort();
-  }, [allFilms]);
+    const map = new Map<string, string>();
+    allMovies.forEach((movie) => {
+      movie.genres?.forEach((genre) => {
+        if (!genre?.id || !genre.name) {
+          return;
+        }
+        map.set(String(genre.id), genre.name);
+      });
+    });
+    return Array.from(map.entries())
+      .map(([value, label]) => ({ value, label }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [allMovies]);
 
   const years = useMemo(() => {
     const set = new Set<number>();
-    allFilms.forEach((film) => set.add(film.year));
+    allMovies.forEach((movie) => {
+      const year = movie.releaseYear ?? (movie.releaseDate ? Number(movie.releaseDate.slice(0, 4)) : null);
+      if (year && !Number.isNaN(year)) {
+        set.add(year);
+      }
+    });
     return Array.from(set).sort((a, b) => b - a);
-  }, [allFilms]);
+  }, [allMovies]);
 
   useEffect(() => {
     let mounted = true;
@@ -105,7 +120,7 @@ const CatalogPage = () => {
       try {
         const data = await catalogRepository.getCatalog({
           query: debouncedSearch || undefined,
-          genre: filters.genre || undefined,
+          genreId: filters.genreId || undefined,
           year: filters.year ? Number(filters.year) : undefined,
           status: (filters.status || undefined) as FilmStatus | undefined,
           page: 1,
@@ -132,16 +147,16 @@ const CatalogPage = () => {
     return () => {
       mounted = false;
     };
-  }, [debouncedSearch, filters.genre, filters.year, filters.status, reloadToken]);
+  }, [debouncedSearch, filters.genreId, filters.year, filters.status, reloadToken]);
 
   const handleResetFilters = () => {
-    const cleared = { search: '', genre: '', year: '', status: '' };
+    const cleared = { search: '', genreId: '', year: '', status: '' };
     setFilters(cleared);
     setDebouncedSearch('');
   };
 
   const hasActiveFilters = Boolean(
-    filters.search || filters.genre || filters.year || filters.status
+    filters.search || filters.genreId || filters.year || filters.status
   );
 
   return (
@@ -155,7 +170,7 @@ const CatalogPage = () => {
       </header>
       <FilterBar
         search={filters.search}
-        genre={filters.genre}
+        genreId={filters.genreId}
         year={filters.year}
         status={filters.status}
         genres={genres}

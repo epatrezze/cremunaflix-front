@@ -1,20 +1,20 @@
-import { fetchJson, type ApiRequestOptions } from '../http';
-import type { SessionDTO, PagedResponseDTO } from '../types';
+import { fetchJson, withQuery, type ApiRequestOptions } from '../http';
+import type { PagedResponseDTO, SessionDTO } from '../../types/dtos';
+import { clampPage, clampPageSize } from './pagination';
 
 export type SessionsQuery = {
-  scope?: string;
+  scope?: 'upcoming' | 'past';
   page?: number;
   pageSize?: number;
 };
 
 export const listSessions = (query: SessionsQuery = {}, options?: ApiRequestOptions) => {
-  const params = new URLSearchParams();
-  if (query.scope) params.set('scope', query.scope);
-  if (query.page) params.set('page', String(query.page));
-  if (query.pageSize) params.set('pageSize', String(query.pageSize));
-  const suffix = params.toString();
-  return fetchJson<PagedResponseDTO<SessionDTO> | SessionDTO[]>(
-    `/api/v1/sessions${suffix ? `?${suffix}` : ''}`,
+  return fetchJson<PagedResponseDTO<SessionDTO>>(
+    withQuery('/sessions', {
+      scope: query.scope,
+      page: clampPage(query.page),
+      pageSize: clampPageSize(query.pageSize)
+    }),
     {},
     options
   );

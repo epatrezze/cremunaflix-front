@@ -1,33 +1,28 @@
-import { fetchJson, type ApiRequestOptions } from '../http';
-import type {
-  CreateRequestBodyDTO,
-  PaginatedResponseDTO,
-  PagedResponseDTO,
-  RequestDTO
-} from '../types';
+import { fetchJson, withQuery, type ApiRequestOptions } from '../http';
+import type { PagedResponseDTO, RequestCreateDTO, RequestDTO, RequestSortDTO } from '../../types/dtos';
+import { clampPage, clampPageSize } from './pagination';
 
 export type RequestsQuery = {
   page?: number;
   pageSize?: number;
-  sort?: string;
+  sort?: RequestSortDTO;
 };
 
 export const listRequests = (query: RequestsQuery = {}, options?: ApiRequestOptions) => {
-  const params = new URLSearchParams();
-  if (query.sort) params.set('sort', query.sort);
-  if (query.page) params.set('page', String(query.page));
-  if (query.pageSize) params.set('pageSize', String(query.pageSize));
-  const suffix = params.toString();
-  return fetchJson<PagedResponseDTO<RequestDTO> | PaginatedResponseDTO<RequestDTO>>(
-    `/api/v1/requests${suffix ? `?${suffix}` : ''}`,
+  return fetchJson<PagedResponseDTO<RequestDTO>>(
+    withQuery('/requests', {
+      sort: query.sort ?? 'requestedAt_desc',
+      page: clampPage(query.page),
+      pageSize: clampPageSize(query.pageSize)
+    }),
     {},
     options
   );
 };
 
-export const createRequest = (payload: CreateRequestBodyDTO, options?: ApiRequestOptions) =>
+export const createRequest = (payload: RequestCreateDTO, options?: ApiRequestOptions) =>
   fetchJson<RequestDTO>(
-    '/api/v1/requests',
+    '/requests',
     {
       method: 'POST',
       body: JSON.stringify(payload)

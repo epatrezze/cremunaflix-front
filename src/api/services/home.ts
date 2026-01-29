@@ -1,5 +1,5 @@
 import { fetchJson, type ApiRequestOptions } from '../http';
-import type { HomeResponseDTO } from '../types';
+import type { HomeResponseDTO } from '../../types/dtos';
 
 export const getHome = (options?: ApiRequestOptions) =>
-  fetchJson<HomeResponseDTO>('/api/v1/home', {}, options);
+  fetchJson<HomeResponseDTO>('/home', {}, options);

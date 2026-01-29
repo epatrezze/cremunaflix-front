@@ -30,15 +30,18 @@ const RequestsPage = () => {
     null
   );
   const titleRef = useRef<HTMLInputElement>(null);
+  const requestedByRef = useRef<HTMLInputElement>(null);
   const linkRef = useRef<HTMLInputElement>(null);
   const reasonRef = useRef<HTMLTextAreaElement>(null);
   const [formState, setFormState] = useState({
     title: '',
+    requestedById: '',
     link: '',
     reason: ''
   });
   const [fieldErrors, setFieldErrors] = useState({
     title: '',
+    requestedById: '',
     link: '',
     reason: ''
   });
@@ -83,20 +86,37 @@ const RequestsPage = () => {
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setFeedback(null);
-    setFieldErrors({ title: '', link: '', reason: '' });
+    setFieldErrors({ title: '', requestedById: '', link: '', reason: '' });
     const title = formState.title.trim();
+    const requestedById = formState.requestedById.trim();
     const link = formState.link.trim();
     const reason = formState.reason.trim();
 
     if (!title) {
       setFeedback({ type: 'error', message: 'Informe um titulo para continuar.' });
-      setFieldErrors({ title: 'Titulo obrigatorio.', link: '', reason: '' });
+      setFieldErrors({ title: 'Titulo obrigatorio.', requestedById: '', link: '', reason: '' });
       titleRef.current?.focus();
+      return;
+    }
+    if (!requestedById) {
+      setFeedback({ type: 'error', message: 'Informe o identificador do solicitante.' });
+      setFieldErrors({
+        title: '',
+        requestedById: 'Identificador obrigatorio.',
+        link: '',
+        reason: ''
+      });
+      requestedByRef.current?.focus();
       return;
     }
     if (!reason) {
       setFeedback({ type: 'error', message: 'Explique o motivo do pedido.' });
-      setFieldErrors({ title: '', link: '', reason: 'Motivo obrigatorio.' });
+      setFieldErrors({
+        title: '',
+        requestedById: '',
+        link: '',
+        reason: 'Motivo obrigatorio.'
+      });
       reasonRef.current?.focus();
       return;
     }
@@ -105,16 +125,21 @@ const RequestsPage = () => {
         new URL(link);
       } catch {
         setFeedback({ type: 'error', message: 'O link informado nao parece valido.' });
-        setFieldErrors({ title: '', link: 'Link invalido.', reason: '' });
+        setFieldErrors({
+          title: '',
+          requestedById: '',
+          link: 'Link invalido.',
+          reason: ''
+        });
         linkRef.current?.focus();
         return;
       }
     }
     setSubmitting(true);
-    const result = await createRequestCommand.execute({ title, link, reason });
+    const result = await createRequestCommand.execute({ title, link, reason, requestedById });
     if (result.ok) {
       setRequests((prev) => [result.data, ...prev]);
-      setFormState({ title: '', link: '', reason: '' });
+      setFormState({ title: '', requestedById: '', link: '', reason: '' });
       setFeedback({ type: 'success', message: 'Pedido enviado com sucesso.' });
     } else {
       setFeedback({ type: 'error', message: result.error.message });
@@ -154,6 +179,31 @@ const RequestsPage = () => {
             {fieldErrors.title && (
               <p id="title-error" className="field-error">
                 {fieldErrors.title}
+              </p>
+            )}
+          </div>
+          <div>
+            <label htmlFor="requestedById">Seu ID</label>
+            <input
+              id="requestedById"
+              type="text"
+              ref={requestedByRef}
+              value={formState.requestedById}
+              onChange={(event) => {
+                const value = event.target.value;
+                setFormState((prev) => ({ ...prev, requestedById: value }));
+                if (fieldErrors.requestedById) {
+                  setFieldErrors((prev) => ({ ...prev, requestedById: '' }));
+                }
+              }}
+              placeholder="Informe seu identificador"
+              aria-invalid={Boolean(fieldErrors.requestedById)}
+              aria-describedby={fieldErrors.requestedById ? 'requestedById-error' : undefined}
+              required
+            />
+            {fieldErrors.requestedById && (
+              <p id="requestedById-error" className="field-error">
+                {fieldErrors.requestedById}
               </p>
             )}
           </div>

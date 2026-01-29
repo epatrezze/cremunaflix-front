@@ -3,16 +3,16 @@
  */
 interface FilterBarProps {
   search: string;
-  genre: string;
+  genreId: string;
   year: string;
   status: string;
-  genres: string[];
+  genres: { value: string; label: string }[];
   years: number[];
   showReset?: boolean;
   onReset?: () => void;
   onChange: (next: {
     search?: string;
-    genre?: string;
+    genreId?: string;
     year?: string;
     status?: string;
   }) => void;
@@ -26,7 +26,7 @@ interface FilterBarProps {
  */
 const FilterBar = ({
   search,
-  genre,
+  genreId,
   year,
   status,
   genres,
@@ -49,14 +49,14 @@ const FilterBar = ({
     <label>
       <span className="sr-only">Genero</span>
       <select
-        value={genre}
-        onChange={(event) => onChange({ genre: event.target.value })}
+        value={genreId}
+        onChange={(event) => onChange({ genreId: event.target.value })}
         aria-label="Filtro de genero"
       >
         <option value="">Todos os generos</option>
         {genres.map((item) => (
-          <option key={item} value={item}>
-            {item}
+          <option key={item.value} value={item.value}>
+            {item.label}
           </option>
         ))}
       </select>

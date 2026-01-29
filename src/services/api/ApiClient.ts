@@ -11,7 +11,6 @@ export type CatalogStatusFilter = FilmStatus | MovieStatus;
 
 export interface CatalogQuery {
   query?: string;
-  genre?: string;
   genreId?: string;
   year?: number;
   status?: CatalogStatusFilter;
@@ -35,6 +34,7 @@ export interface CreateRequestPayload {
   title: string;
   link: string;
   reason: string;
+  requestedById: string;
 }
 
 export interface ApiClient {

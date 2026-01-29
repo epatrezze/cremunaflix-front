@@ -20,6 +20,9 @@ const normalizeCatalogStatus = (status?: CatalogStatusFilter) => {
   if (status === 'SCREENED') {
     return 'EXHIBITED';
   }
+  if (status === 'SCHEDULED') {
+    return 'UPCOMING';
+  }
   return status;
 };
 
@@ -52,7 +55,7 @@ export class MockAdapter implements ApiClient {
     await delay(220);
     const normalizedQuery = query.query?.toLowerCase().trim();
     const status = normalizeCatalogStatus(query.status);
-    const genreFilter = query.genre ?? query.genreId;
+    const genreFilter = query.genreId;
     const filtered = movies.filter((movie) => {
       const matchesQuery = normalizedQuery
         ? movie.title.toLowerCase().includes(normalizedQuery) ||
@@ -65,7 +68,9 @@ export class MockAdapter implements ApiClient {
         : true;
       const movieYear = movie.releaseYear ?? parseYear(movie.releaseDate);
       const matchesYear = query.year ? movieYear === query.year : true;
-      const matchesStatus = status ? movie.status === status : true;
+      const matchesStatus = status
+        ? movie.status === status || (status === 'UPCOMING' && movie.status === 'SCHEDULED')
+        : true;
       return matchesQuery && matchesGenre && matchesYear && matchesStatus;
     });
 
