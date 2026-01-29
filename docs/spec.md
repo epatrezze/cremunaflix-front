@@ -114,15 +114,17 @@ Backend retorna:
 Front deve sempre exibir `message`.
 
 ### HomeResponse (GET /api/v1/home)
-Nao existe contrato no repo. Proposta minima para suportar HomePage:
+Contrato esperado pelo front hoje:
 ```
 {
-  catalog: { items: Movie[]; page: number; pageSize: number; total: number },
-  upcomingSessions: Session[],
-  requests: { items: Request[]; page: number; pageSize: number; total: number }
+  hero: { title: string; items: SessionDTO[] } | null,
+  lastExhibited: MovieSummaryDTO[],
+  mostRequested: MovieSummaryDTO[]
 }
 ```
-Se o backend nao fornecer este formato, a HomePage pode continuar usando chamadas separadas.
+Notas:
+- `hero` pode ser omitido ou `null`.
+- `items` em `hero` sao sessoes com `filmId`/`movieId` e `startsAt`.
 
 ## 5. Estrategia de integracao
 ### Config env

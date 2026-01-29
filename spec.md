@@ -21,7 +21,7 @@ P0
 - `pageSize` acima do max 100 no catalogo (`src/ui/pages/CatalogPage.tsx` usa 200).
 
 P1
-- Tipos/DTOs nao estao 1:1 com o contrato: falta `MovieSummaryDTO` e `RequestCreateDTO` e os DTOs atuais sao permissivos (campos opcionais) em `src/api/types/*`.
+- Tipos/DTOs nao estao 1:1 com o contrato: falta `MovieSummaryDTO` e `RequestCreateDTO` e os DTOs atuais sao permissivos (campos opcionais) em `src/types/dtos.ts`.
 - Headers: `Content-Type: application/json` nao e enviado em GET (`src/api/http.ts`), enquanto o contrato exige ambos headers.
 - Paginacao em sessions/requests nao e controlada pela UI; pode consumir apenas a primeira pagina por default.
 
@@ -30,7 +30,7 @@ P2
 
 ## 4) Mudancas Necessarias
 - [ ] Ajustar Home para consumir `GET /api/v1/home` e mapear `hero`, `lastExhibited`, `mostRequested` para a UI (`src/ui/pages/HomePage.tsx` e repositorios associados).
-- [ ] Criar/ajustar DTOs 1:1 com contrato em `src/api/types/` incluindo `MovieSummaryDTO` e `RequestCreateDTO` (com `requestedById` quando nao houver auth).
+- [ ] Criar/ajustar DTOs 1:1 com contrato em `src/types/dtos.ts` incluindo `MovieSummaryDTO` e `RequestCreateDTO` (com `requestedById` quando nao houver auth).
 - [ ] Adequar o payload do POST `/api/v1/requests` ao RequestCreateDTO do contrato (`src/services/api/adapters/HttpAdapter.ts#createRequest`).
 - [ ] Restringir `pageSize` ao max 100 e revisar uso de paginacao em `CatalogPage`, `SessionsPage`, `RequestsPage`.
 - [ ] Garantir envio de `Content-Type: application/json` e `Accept: application/json` em todas as chamadas, inclusive GET, conforme contrato (`src/api/http.ts`).

@@ -1,29 +1,37 @@
 # Cremunaflix Front
 
-Interface estilo streaming para o acervo exibido em sessoes de cinema no Discord. Este projeto usa React + Vite + TypeScript, com dados mockados e arquitetura pronta para trocar por uma API real.
+Interface estilo streaming para o acervo exibido em sessões de cinema no Discord. Feito em React + Vite + TypeScript, com suporte a mocks locais e integração com API REST (Salesforce Apex REST).
+
+## Páginas
+- Home (`/`) — destaques + carrosséis.
+- Catálogo (`/catalogo`) — filtros por busca, gênero, ano e status.
+- Sessões (`/sessoes`) — próximas e passadas.
+- Pedidos (`/pedidos`) — formulário + lista de pedidos.
 
 ## Stack
-- React + Vite + TypeScript
-- React Router com HashRouter (compatibilidade GitHub Pages)
-- Dados mockados em `src/mocks`
+- React 18 + Vite + TypeScript
+- React Router com HashRouter (compatível com GitHub Pages)
+- Tailwind CSS + CSS global
 
-## Estrutura
+## Arquitetura (alto nível)
+Fluxo principal:
+`UI (pages/components)` → `domain (repositories/adapters)` → `services/api (ApiClient + adapters)` → `api/http.ts` (fetch wrapper)
+
+Pastas principais:
 ```
 src/
-  app/
-  routes/
-  ui/
-    components/
-    pages/
-  domain/
-  services/
-  contracts/
-  mocks/
-  styles/
+  app/             # shell da aplicação
+  routes/          # rotas do SPA
+  ui/              # pages e componentes
+  domain/          # regras, adapters e repositórios
+  services/api/    # ApiClient + adapters (Mock/HTTP) [ativo]
+  api/             # fetch + services (endpoints)
+  contracts/       # contratos usados pela UI
+  mocks/           # dados locais
+  styles/          # CSS global
 ```
 
-## Styling
-Este projeto usa Tailwind CSS em conjunto com CSS global. As diretivas Tailwind estao em `src/styles/global.css`, que tambem concentra tokens e estilos custom. A migracao e incremental e alguns componentes ainda dependem das classes globais existentes.
+Nota: existe uma pasta `src/services/` (sem `/api`) com arquivos legados não usados no fluxo atual.
 
 ## Rodando localmente
 ```bash
@@ -31,77 +39,22 @@ npm install
 npm run dev
 ```
 
-Nota: CI usa `npm ci`.
+## Configuração por env
+Variáveis suportadas (Vite):
+- `VITE_USE_MOCK` — `false` para usar API real. Qualquer outro valor usa mocks.
+- `VITE_API_BASE_URL` — base da API (sem barra final), ex:
+  `https://example.salesforce.com/services/apexrest`
+- `VITE_SF_API_BASE_URL` — alias opcional para o mesmo valor.
+- `VITE_API_PROXY_TARGET` — alvo do proxy no dev (sem path), ex:
+  `https://example.salesforce.com`
+- `VITE_API_PROXY_PREFIX` — prefixo do proxy (default: `/services/apexrest`).
+- `VITE_BASE` — base do Vite em build (ex.: `/cremunaflix-front/`).
+- `GITHUB_PAGES=true` — ajusta a base automaticamente no build.
 
-## Migracao incremental
-- CSS global continua ativo para evitar regressao visual.
-- Tailwind esta configurado e pode ser aplicado gradualmente em componentes novos ou existentes.
+Fallback: se nenhuma base for informada, o client usa o `import.meta.env.BASE_URL` do app (útil para API no mesmo domínio do front).
 
-## Build
-```bash
-npm run build
-npm run preview
-```
-
-## Validacao local (Pages)
-Build normal:
-```bash
-npm run build
-```
-
-Build simulando GitHub Pages (ajusta base path):
-```bash
-GITHUB_PAGES=true VITE_BASE=/cremunaflix-front/ npm run build
-```
-
-Preview do build:
-```bash
-npm run preview
-```
-
-## Deploy no GitHub Pages
-O workflow em `.github/workflows/deploy.yml` publica automaticamente ao fazer push na branch `main`.
-
-Passos:
-1. Habilite GitHub Pages em Settings > Pages e selecione GitHub Actions.
-2. Faca push para a branch `main`.
-3. Aguarde o workflow finalizar.
-
-Observacao: o `vite.config.ts` calcula automaticamente o `base` usando o nome do repositorio no GitHub Actions. Se voce estiver fazendo build local para publicar manualmente, defina `VITE_BASE=/<nome-do-repo>/` antes de rodar o build.
-
-Se o site aparecer em branco com erro de `src/main.tsx`, isso indica que o GitHub Pages ainda esta servindo o conteudo do branch em vez do build do workflow. Confirme a configuracao acima.
-
-Checklist rapido de diagnostico:
-1. Pages esta em Settings > Pages -> Source: GitHub Actions.
-2. O deploy mais recente mostra artefato publicado (dist).
-3. O HTML servido referencia `/cremunaflix-front/assets/...` em vez de `/src/main.tsx`.
-
-## Alternar Mock / API
-O projeto usa mocks por padrao. Para alternar:
-
-```bash
-VITE_USE_MOCK=false npm run dev
-```
-
-Configure `VITE_API_BASE_URL` para apontar para o Salesforce Apex REST (placeholder em `.env.example`).
-Para desenvolvimento local sem CORS, use o proxy do Vite:
-- `VITE_API_BASE_URL=/services/apexrest`
-- `VITE_API_PROXY_TARGET=https://example.salesforce.com`
-- `VITE_API_PROXY_PREFIX=/services/apexrest`
-Copie `.env.example` para `.env` e ajuste os valores conforme necessario.
-
-A implementacao da API HTTP esta em `src/api/http.ts` + `src/api/services/*`, com adaptacao em `src/services/api/adapters/HttpAdapter.ts` seguindo o contrato em `src/contracts/api.v1.ts`.
-
-Documentacao do contrato: `docs/api-v1.md`.
-
-Nota API-ready: defina `VITE_USE_MOCK=false` e `VITE_API_BASE_URL` para usar o HttpAdapter sem alterar a UI.
-
-Teste manual rapido (HTTP adapter):
-```bash
-VITE_USE_MOCK=false VITE_API_BASE_URL=https://example.salesforce.com/services/apexrest npm run dev
-```
-
-Teste manual com proxy (evita CORS no localhost):
+## API real (sem CORS no localhost)
+Use o proxy do Vite:
 ```bash
 VITE_USE_MOCK=false \
 VITE_API_BASE_URL=/services/apexrest \
@@ -110,10 +63,50 @@ VITE_API_PROXY_PREFIX=/services/apexrest \
 npm run dev
 ```
 
-## Endpoints por tela
-- Home: `GET /api/v1/home` (ou fallback para `GET /api/v1/movies`, `GET /api/v1/sessions?scope=upcoming` e `GET /api/v1/requests`).
-- Catalogo: `GET /api/v1/movies` com `query`, `status`, `year`, `genreId`, `page`, `pageSize`.
-- Sessoes: `GET /api/v1/sessions?scope=upcoming` e `GET /api/v1/sessions?scope=past`.
-- Pedidos: `GET /api/v1/requests` e `POST /api/v1/requests`.
+## API real (direto, sem proxy)
+```bash
+VITE_USE_MOCK=false \
+VITE_API_BASE_URL=https://example.salesforce.com/services/apexrest \
+npm run dev
+```
 
-Nota: flags v7 do React Router habilitadas para preparar upgrade.
+Se aparecer erro de CORS, configure o Allowed Origin no Salesforce (ex.: `http://localhost:5173`).
+
+## Build e preview
+```bash
+npm run build
+npm run preview
+```
+
+Build simulando GitHub Pages:
+```bash
+GITHUB_PAGES=true VITE_BASE=/cremunaflix-front/ npm run build
+```
+
+## Deploy no GitHub Pages
+O workflow em `.github/workflows/deploy.yml` publica ao fazer push na branch `main`.
+
+Passos:
+1. Em Settings → Pages, selecione GitHub Actions.
+2. Defina as envs como **Secrets** ou **Variables**:
+   - `VITE_API_BASE_URL` (ou `VITE_SF_API_BASE_URL`)
+3. Faça push na `main` e aguarde o workflow.
+
+Diagnóstico rápido:
+- O HTML servido deve referenciar `/cremunaflix-front/assets/...`.
+- Se carregar `/src/main.tsx`, o Pages está apontando para o branch, não para o build.
+
+## Endpoints esperados
+- Home: `GET /api/v1/home`
+- Catálogo: `GET /api/v1/movies`
+- Sessões: `GET /api/v1/sessions?scope=upcoming|past`
+- Pedidos: `GET /api/v1/requests`
+- Criar pedido: `POST /api/v1/requests` (exige `requestedById`)
+
+Contratos principais:
+- `src/contracts/*` (UI)
+- `src/types/dtos.ts` (DTOs atuais)
+
+## Notas de styling
+Tailwind está ativo com CSS global em `src/styles/global.css`. A migração é incremental, então alguns componentes ainda dependem de classes globais.
+
