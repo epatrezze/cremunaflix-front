@@ -12,8 +12,10 @@ export type CatalogStatusFilter = FilmStatus | MovieStatus;
 export interface CatalogQuery {
   query?: string;
   genre?: string;
+  genreId?: string;
   year?: number;
   status?: CatalogStatusFilter;
+  sort?: string;
   page?: number;
   pageSize?: number;
 }
@@ -25,8 +27,8 @@ export interface RequestListQuery {
 }
 
 export interface PastSessionsQuery {
-  from?: string;
-  to?: string;
+  page?: number;
+  pageSize?: number;
 }
 
 export interface CreateRequestPayload {

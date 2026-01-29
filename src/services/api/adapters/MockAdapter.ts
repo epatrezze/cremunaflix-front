@@ -52,13 +52,16 @@ export class MockAdapter implements ApiClient {
     await delay(220);
     const normalizedQuery = query.query?.toLowerCase().trim();
     const status = normalizeCatalogStatus(query.status);
+    const genreFilter = query.genre ?? query.genreId;
     const filtered = movies.filter((movie) => {
       const matchesQuery = normalizedQuery
         ? movie.title.toLowerCase().includes(normalizedQuery) ||
           (movie.originalTitle ?? '').toLowerCase().includes(normalizedQuery)
         : true;
-      const matchesGenre = query.genre
-        ? movie.genres?.some((genre) => genre.name === query.genre)
+      const matchesGenre = genreFilter
+        ? movie.genres?.some(
+            (genre) => genre.name === genreFilter || String(genre.id) === genreFilter
+          )
         : true;
       const movieYear = movie.releaseYear ?? parseYear(movie.releaseDate);
       const matchesYear = query.year ? movieYear === query.year : true;
@@ -85,23 +88,11 @@ export class MockAdapter implements ApiClient {
       .sort((a, b) => a.startsAt.localeCompare(b.startsAt));
   }
 
-  async getPastSessions(query: PastSessionsQuery = {}) {
+  async getPastSessions(_query: PastSessionsQuery = {}) {
     await delay(240);
-    const fromDate = query.from ? new Date(query.from) : null;
-    const toDate = query.to ? new Date(query.to) : null;
 
     return sessions
       .filter((session) => session.status === 'PAST')
-      .filter((session) => {
-        const sessionDate = new Date(session.startsAt);
-        if (fromDate && sessionDate < fromDate) {
-          return false;
-        }
-        if (toDate && sessionDate > toDate) {
-          return false;
-        }
-        return true;
-      })
       .sort((a, b) => b.startsAt.localeCompare(a.startsAt));
   }
 
