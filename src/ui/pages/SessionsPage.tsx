@@ -63,7 +63,20 @@ const SessionsPage = () => {
   const filteredSessions = useMemo(() => {
     return sessions
       .filter((session) => session.status === tab)
-      .sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+      .sort((a, b) => {
+        const aHasDate = Boolean(a.startsAt);
+        const bHasDate = Boolean(b.startsAt);
+        if (!aHasDate && !bHasDate) {
+          return 0;
+        }
+        if (!aHasDate) {
+          return 1;
+        }
+        if (!bHasDate) {
+          return -1;
+        }
+        return a.startsAt.localeCompare(b.startsAt);
+      });
   }, [sessions, tab]);
 
   const grouped = useMemo(() => groupSessionsByDay(filteredSessions), [filteredSessions]);

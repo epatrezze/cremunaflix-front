@@ -8,14 +8,33 @@ export type ApiRequestOptions = {
 const DEFAULT_TIMEOUT_MS = 10000;
 const API_PREFIX = '/api/v1';
 
+const resolveRuntimeBaseUrl = () => {
+  if (typeof window === 'undefined') {
+    return '';
+  }
+  const basePath = import.meta.env.BASE_URL || '/';
+  const resolved = new URL(basePath, window.location.origin).toString();
+  return resolved.replace(/\/$/, '');
+};
+
 const resolveBaseUrl = (baseUrl?: string) => {
-  const raw = baseUrl ?? import.meta.env.VITE_API_BASE_URL ?? '';
-  return raw.replace(/\/$/, '');
+  const raw =
+    baseUrl?.trim() ||
+    import.meta.env.VITE_API_BASE_URL?.trim() ||
+    import.meta.env.VITE_SF_API_BASE_URL?.trim() ||
+    '';
+
+  if (raw) {
+    return raw.replace(/\/$/, '');
+  }
+
+  return resolveRuntimeBaseUrl();
 };
 
 const joinPath = (baseUrl: string, path: string) => {
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
-  return `${baseUrl}${API_PREFIX}${cleanPath}`;
+  const prefix = baseUrl.endsWith(API_PREFIX) ? '' : API_PREFIX;
+  return `${baseUrl}${prefix}${cleanPath}`;
 };
 
 export const withQuery = (
@@ -82,7 +101,9 @@ export const fetchJson = async <T>(
   try {
     const headers = new Headers(init.headers);
     headers.set('Accept', 'application/json');
-    headers.set('Content-Type', 'application/json');
+    if (init.body && !headers.has('Content-Type')) {
+      headers.set('Content-Type', 'application/json');
+    }
 
     const response = await fetch(url, {
       ...init,

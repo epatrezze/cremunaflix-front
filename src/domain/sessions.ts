@@ -8,7 +8,11 @@ import type { Session } from '../contracts';
  */
 export const groupSessionsByDay = (items: Session[]) => {
   return items.reduce<Record<string, Session[]>>((acc, session) => {
-    const key = session.startsAt.split('T')[0];
+    const raw = session.startsAt?.trim();
+    const keyCandidate = raw ? raw.split('T')[0].split(' ')[0] : '';
+    const keyDate = keyCandidate ? new Date(keyCandidate) : null;
+    const key =
+      keyCandidate && keyDate && !Number.isNaN(keyDate.getTime()) ? keyCandidate : 'unknown';
     if (!acc[key]) {
       acc[key] = [];
     }

@@ -84,6 +84,10 @@ VITE_USE_MOCK=false npm run dev
 ```
 
 Configure `VITE_API_BASE_URL` para apontar para o Salesforce Apex REST (placeholder em `.env.example`).
+Para desenvolvimento local sem CORS, use o proxy do Vite:
+- `VITE_API_BASE_URL=/services/apexrest`
+- `VITE_API_PROXY_TARGET=https://example.salesforce.com`
+- `VITE_API_PROXY_PREFIX=/services/apexrest`
 Copie `.env.example` para `.env` e ajuste os valores conforme necessario.
 
 A implementacao da API HTTP esta em `src/api/http.ts` + `src/api/services/*`, com adaptacao em `src/services/api/adapters/HttpAdapter.ts` seguindo o contrato em `src/contracts/api.v1.ts`.
@@ -95,6 +99,15 @@ Nota API-ready: defina `VITE_USE_MOCK=false` e `VITE_API_BASE_URL` para usar o H
 Teste manual rapido (HTTP adapter):
 ```bash
 VITE_USE_MOCK=false VITE_API_BASE_URL=https://example.salesforce.com/services/apexrest npm run dev
+```
+
+Teste manual com proxy (evita CORS no localhost):
+```bash
+VITE_USE_MOCK=false \
+VITE_API_BASE_URL=/services/apexrest \
+VITE_API_PROXY_TARGET=https://example.salesforce.com \
+VITE_API_PROXY_PREFIX=/services/apexrest \
+npm run dev
 ```
 
 ## Endpoints por tela

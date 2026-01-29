@@ -4,11 +4,21 @@
  * @param value - ISO date or date-time string.
  * @returns Localized date-time label.
  */
-export const formatDate = (value: string) =>
-  new Intl.DateTimeFormat('pt-BR', {
+const parseDate = (value: string) => {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+export const formatDate = (value: string) => {
+  const date = parseDate(value);
+  if (!date) {
+    return 'Data a definir';
+  }
+  return new Intl.DateTimeFormat('pt-BR', {
     dateStyle: 'medium',
     timeStyle: 'short'
-  }).format(new Date(value));
+  }).format(date);
+};
 
 /**
  * Formats a date string in pt-BR with weekday and day.
@@ -16,9 +26,14 @@ export const formatDate = (value: string) =>
  * @param value - ISO date or date-time string.
  * @returns Localized date label.
  */
-export const formatDay = (value: string) =>
-  new Intl.DateTimeFormat('pt-BR', {
+export const formatDay = (value: string) => {
+  const date = parseDate(value);
+  if (!date) {
+    return 'Data a definir';
+  }
+  return new Intl.DateTimeFormat('pt-BR', {
     weekday: 'long',
     month: 'short',
     day: 'numeric'
-  }).format(new Date(value));
+  }).format(date);
+};

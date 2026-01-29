@@ -41,10 +41,32 @@ const normalizeSessionStatus = (status?: string | null): Session['status'] => {
   return 'PAST';
 };
 
+const resolveSessionStartsAt = (session: SessionDTO) => {
+  const candidate =
+    session.startsAt ??
+    (session as Record<string, unknown>).startAt ??
+    (session as Record<string, unknown>).startDate ??
+    (session as Record<string, unknown>).sessionDate ??
+    (session as Record<string, unknown>).starts_at ??
+    null;
+
+  if (typeof candidate === 'string') {
+    return candidate;
+  }
+  if (typeof candidate === 'number') {
+    const date = new Date(candidate);
+    return Number.isNaN(date.getTime()) ? '' : date.toISOString();
+  }
+  if (candidate instanceof Date) {
+    return candidate.toISOString();
+  }
+  return '';
+};
+
 export const normalizeSessionDto = (session: SessionDTO): Session => ({
   id: session.id ?? '',
   filmId: session.filmId ?? session.movieId ?? '',
-  startsAt: session.startsAt ?? '',
+  startsAt: resolveSessionStartsAt(session),
   status: normalizeSessionStatus(session.status),
   host: session.host ?? 'A definir',
   room: session.room ?? 'Discord',
